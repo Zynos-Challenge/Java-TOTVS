@@ -95,6 +95,124 @@ public class Analise {
         this.reclamacoes = reclamacoes;
     }
 
+    //métodos:
+    // calcula o score geral da reuniao baseado nos alertas e sentimento
+    public int calcularScore() {
+        // 50 seria uma reunião neutra
+        int score = 50;
+
+        if (sentimento.equals("POSITIVO")) score += 20;
+        if (sentimento.equals("NEGATIVO")) score -= 20;
+
+        for (Alerta alertaAtual : alertas) {
+            if (alertaAtual.getTipo().equals("CHURN")) score -= 15;
+            if (alertaAtual.getTipo().equals("CONCORRENTE")) score -= 10;
+            if (alertaAtual.getTipo().equals("OPORTUNIDADE")) score += 10;
+        }
+
+        // garante que o score fica entre 0 e 100
+        if (score > 100) score = 100;
+        if (score < 0) score = 0;
+
+        this.scoreGeral = score;
+        return score;
+    }
+    //detectar reclamações  baseado no texto
+    public List<String> detectarReclamacoes() {
+        String texto = reuniao.getTextoOriginal().toLowerCase();
+
+        List<String> reclamacoesSuporte = List.of(
+                "suporte", "atendimento", "demora", "nao respondeu", "sem retorno"
+        );
+
+        List<String> reclamacoesProduto = List.of(
+                "trava", "lento", "erro", "bug", "falha", "nao funciona",
+                "travando", "caindo", "instavel"
+        );
+
+        List<String> reclamacoesPreco = List.of(
+                "caro", "valor alto", "preco", "custo elevado", "muito caro"
+        );
+
+        List<String> reclamacoesIntegracao = List.of(
+                "nao integra", "nao comunica", "sistema separado",
+                "nao conversa", "isolado"
+        );
+
+        for (String sinal : reclamacoesSuporte) {
+            if (texto.contains(sinal)) {
+                reclamacoes.add("SUPORTE: " + sinal);
+            }
+        }
+
+        for (String sinal : reclamacoesProduto) {
+            if (texto.contains(sinal)) {
+                reclamacoes.add("PRODUTO: " + sinal);
+            }
+        }
+
+        for (String sinal : reclamacoesPreco) {
+            if (texto.contains(sinal)) {
+                reclamacoes.add("PRECO: " + sinal);
+            }
+        }
+
+        for (String sinal : reclamacoesIntegracao) {
+            if (texto.contains(sinal)) {
+                reclamacoes.add("INTEGRACAO: " + sinal);
+            }
+        }
+
+        return reclamacoes;
+    }
+    // detecta o tom de voz baseado no texto
+    public String detectarTomDeVoz() {
+        String texto = reuniao.getTextoOriginal().toLowerCase();
+
+        List<String> tomAgressivo = List.of(
+                "absurdo", "inaceitavel", "ridiculo", "nao aguento", "revoltado",
+                "uma vergonha", "inadmissivel", "pessimo", "horrivel"
+        );
+
+        List<String> tomPositivo = List.of(
+                "otimo", "excelente", "maravilhoso", "perfeito", "feliz",
+                "satisfeito", "contente", "muito bom", "aprovado"
+        );
+
+        List<String> tomAnsioso = List.of(
+                "urgente", "preciso logo", "quanto antes", "prazo",
+                "atrasado", "nao pode esperar", "emergencia"
+        );
+
+        int pontosAgressivo = 0;
+        int pontosPositivo = 0;
+        int pontosAnsioso = 0;
+
+        for (String sinal : tomAgressivo) {
+            if (texto.contains(sinal)) pontosAgressivo++;
+        }
+
+        for (String sinal : tomPositivo) {
+            if (texto.contains(sinal)) pontosPositivo++;
+        }
+
+        for (String sinal : tomAnsioso) {
+            if (texto.contains(sinal)) pontosAnsioso++;
+        }
+
+        if (pontosAgressivo >= pontosPositivo & pontosAgressivo >= pontosAnsioso) {
+            this.tomDeVoz = "AGRESSIVO";
+        } else if (pontosAnsioso >= pontosPositivo & pontosAnsioso >= pontosAgressivo) {
+            this.tomDeVoz = "ANSIOSO";
+        } else if (pontosPositivo > 0) {
+            this.tomDeVoz = "POSITIVO";
+        } else {
+            this.tomDeVoz = "NEUTRO";
+        }
+
+        return this.tomDeVoz;
+    }
+
     @Override
     public String toString() {
         return "\n=== ANALISE ===" +
