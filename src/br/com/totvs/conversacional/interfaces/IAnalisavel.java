@@ -1,4 +1,8 @@
 package br.com.totvs.conversacional.interfaces;
 
-public class IAnalisavel {
+public interface IAnalisavel {
+
+    int calcularScore();
+
+    String gerarRelatorio();
 }
