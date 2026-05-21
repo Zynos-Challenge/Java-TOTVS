@@ -69,9 +69,19 @@ public class LeitorArquivo {
             reuniao.setTipoRecurso(extrairValor(json, "TP_RECURSO"));
 
             // Duração
+            // Duração
             String duracaoStr = extrairValor(json, "DURACAO_MEETING");
             if (duracaoStr != null && !duracaoStr.isEmpty()) {
-                reuniao.setDuracao((int) Double.parseDouble(duracaoStr));
+                if (duracaoStr.contains(":")) {
+                    // Formato HH:mm:ss → converte para minutos
+                    String[] partes = duracaoStr.split(":");
+                    int horas = Integer.parseInt(partes[0]);
+                    int minutos = Integer.parseInt(partes[1]);
+                    int segundos = partes.length > 2 ? Integer.parseInt(partes[2]) : 0;
+                    reuniao.setDuracao((horas * 60) + minutos + (segundos >= 30 ? 1 : 0));
+                } else {
+                    reuniao.setDuracao((int) Double.parseDouble(duracaoStr));
+                }
             }
 
             // NPS

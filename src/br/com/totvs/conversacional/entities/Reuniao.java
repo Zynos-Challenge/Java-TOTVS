@@ -68,7 +68,6 @@ public class Reuniao {
                 "\nNPS: " + notaNps +
                 "\nTipo Recurso: " + tipoRecurso +
                 "\nUF: " + uf +
-                "\nFaixa Faturamento: " + faixaFaturamento +
-                "\nTexto Original: " + textoOriginal;
+                "\nFaixa Faturamento: " + faixaFaturamento;
     }
 }
