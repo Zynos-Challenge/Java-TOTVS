@@ -2,10 +2,8 @@ package br.com.totvs.conversacional.main;
 
 import br.com.totvs.conversacional.entities.Analise;
 import br.com.totvs.conversacional.entities.Reuniao;
-import br.com.totvs.conversacional.interfaces.IAnalisavel;
 import br.com.totvs.conversacional.repository.LeitorArquivo;
 import br.com.totvs.conversacional.services.Analisador;
-import br.com.totvs.conversacional.services.AnalisadorIA;
 
 import javax.swing.JOptionPane;
 import java.util.List;
@@ -16,7 +14,6 @@ public class TesteSistema {
     private static Analisador analisador;
     private static List<Reuniao> reunioes;
     private static List<Analise> analises;
-    private static boolean modoIA = false;
 
     public static void main(String[] args) {
 
@@ -48,31 +45,6 @@ public class TesteSistema {
                 JOptionPane.INFORMATION_MESSAGE
         );
 
-        // ───── Escolha do modo de análise ─────
-        String[] modos = {
-                "1 - Análise local (palavras-chave)",
-                "2 - Análise com IA (Gemini)"
-        };
-
-        String modo = (String) JOptionPane.showInputDialog(
-                null,
-                "Selecione o modo de análise:",
-                "Sistema TOTVS - Modo de Análise",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                modos,
-                modos[0]
-        );
-
-        if (modo == null) return;
-        modoIA = modo.charAt(0) == '2';
-
-        JOptionPane.showMessageDialog(null,
-                modoIA ? "Modo IA ativado! Usando Gemini 1.5 Flash." : "Modo local ativado! Usando palavras-chave.",
-                "Sistema TOTVS",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-
         // ───── Menu principal ─────
         boolean rodando = true;
         while (rodando) {
@@ -86,7 +58,7 @@ public class TesteSistema {
 
             String escolha = (String) JOptionPane.showInputDialog(
                     null,
-                    "Selecione uma opção: [Modo: " + (modoIA ? "IA Gemini" : "Local") + "]",
+                    "Selecione uma opção:",
                     "Sistema TOTVS - Menu Principal",
                     JOptionPane.PLAIN_MESSAGE,
                     null,
@@ -115,15 +87,6 @@ public class TesteSistema {
     // ───── Opção 1: Analisar todas ─────
 
     private static void opcaoAnalisarTodas() {
-        if (modoIA) {
-            JOptionPane.showMessageDialog(null,
-                    "O modo IA analisa uma reunião por vez.\nUse a opção 2 para analisar por ID.",
-                    "Aviso",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            return;
-        }
-
         analises = analisador.analisarReunioes(reunioes);
 
         JOptionPane.showMessageDialog(null,
@@ -159,28 +122,15 @@ public class TesteSistema {
             }
 
             Reuniao reuniao = reunioes.get(id - 1);
-            IAnalisavel analisavel;
-            String resultado;
-
-            if (modoIA) {
-                // Modo IA - usa Gemini
-                analisavel = new AnalisadorIA(reuniao);
-                analisavel.calcularScore();
-                resultado = reuniao.toString() + "\n\n=== RELATORIO IA ===\n" + analisavel.gerarRelatorio();
-            } else {
-                // Modo local - usa palavras-chave
-                Analise analise = new Analise();
-                analise.setReuniao(reuniao);
-                analise.detectarReclamacoes();
-                analise.detectarTomDeVoz();
-                analise.calcularScore();
-                analisavel = analise;
-                resultado = reuniao.toString() + "\n" + analise.toString();
-            }
+            Analise analise = new Analise();
+            analise.setReuniao(reuniao);
+            analise.detectarReclamacoes();
+            analise.detectarTomDeVoz();
+            analise.calcularScore();
 
             JOptionPane.showMessageDialog(null,
-                    resultado,
-                    "Reunião #" + id + (modoIA ? " [IA Gemini]" : " [Local]"),
+                    reuniao.toString() + "\n" + analise.toString(),
+                    "Reunião #" + id,
                     JOptionPane.INFORMATION_MESSAGE
             );
 
@@ -196,15 +146,6 @@ public class TesteSistema {
     // ───── Opção 3: Resumo geral ─────
 
     private static void opcaoResumoGeral() {
-        if (modoIA) {
-            JOptionPane.showMessageDialog(null,
-                    "O resumo geral está disponível apenas no modo local.\nUse a opção 1 primeiro.",
-                    "Aviso",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            return;
-        }
-
         if (analises == null || analises.isEmpty()) {
             JOptionPane.showMessageDialog(null,
                     "Nenhuma análise realizada ainda.\nUse a opção 1 primeiro.",
