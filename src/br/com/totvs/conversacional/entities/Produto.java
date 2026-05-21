@@ -2,10 +2,10 @@ package br.com.totvs.conversacional.entities;
 
 public class Produto {
 
-    public String nome;
-    public String categoria;
-    public String status;
-    public String versaoMencao;
+    private String nome;
+    private  String categoria;
+    private String status;
+    private String versaoMencao;
 
     public Produto(){}
 

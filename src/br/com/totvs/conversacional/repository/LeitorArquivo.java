@@ -15,6 +15,11 @@ public class LeitorArquivo {
     private String caminhoArquivo;
     private List<Reuniao> reunioes;
 
+
+    public LeitorArquivo(){
+
+    }
+
     public LeitorArquivo(String caminhoArquivo) {
         this.caminhoArquivo = caminhoArquivo;
         this.reunioes = new ArrayList<>();
