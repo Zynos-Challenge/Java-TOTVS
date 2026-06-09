@@ -26,6 +26,7 @@ public class Analisador {
             Analise analise = new Analise();
             analise.setReuniao(reuniao);
             analise.detectarReclamacoes();
+            analise.detectarAlertas();
             analise.detectarTomDeVoz();
             analise.calcularScore();
             aplicarBonusNps(analise);
@@ -36,14 +37,15 @@ public class Analisador {
     }
 
     private void aplicarBonusNps(Analise analise) {
-        int nps = analise.getReuniao().getNotaNps();
-        int score = analise.getScoreGeral();
+        Integer nps = analise.getReuniao().getNotaNps();
+        if (nps == null) return;   // registro sem NPS: não aplica bônus/penalidade
 
+        int score = analise.getScoreGeral();
         if (nps >= 9) score += 10;
         else if (nps <= 6) score -= 10;
 
         if (score > 100) score = 100;
-        if (score < 0) score = 0;
+        if (score <   0) score = 0;
 
         analise.setScoreGeral(score);
     }

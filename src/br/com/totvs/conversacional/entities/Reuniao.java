@@ -4,70 +4,171 @@ import java.time.LocalDateTime;
 
 public class Reuniao {
 
+    private String id;
     private LocalDateTime data;
+    private LocalDateTime dataCriacao;
     private int duracao;
     private String textoOriginal;
-    private int pFalaVendedor;
+    private String formato;
+    private String status;
+    private String codt;
+    private boolean externo;
 
-    //Campos extras do JSON
+    // Campos opcionais (nem sempre presentes no JSON)
     private String segmento;
-    private int notaNps;
-    private String tipoRecurso;
+    private String unidade;
+    private String cnae;
     private String uf;
     private String faixaFaturamento;
+    private String tipoRecurso;
+    private Integer notaNps;           // Integer (nullable) — só 26% dos registros têm
+
+    public Reuniao() {}
+
+    // ── Getters e Setters ──
 
 
-    public Reuniao(){}
+    public Integer getNotaNps() {
+        return notaNps;
+    }
 
-    public Reuniao(LocalDateTime data, int duracao, String textoOriginal, int pFalaVendedor, String segmento, int notaNps, String tipoRecurso, String uf, String faixaFaturamento) {
-        this.data = data;
-        this.duracao = duracao;
-        this.textoOriginal = textoOriginal;
-        this.pFalaVendedor = pFalaVendedor;
-        this.segmento = segmento;
+    public void setNotaNps(Integer notaNps) {
         this.notaNps = notaNps;
+    }
+
+    public String getTipoRecurso() {
+        return tipoRecurso;
+    }
+
+    public void setTipoRecurso(String tipoRecurso) {
         this.tipoRecurso = tipoRecurso;
-        this.uf = uf;
+    }
+
+    public String getFaixaFaturamento() {
+        return faixaFaturamento;
+    }
+
+    public void setFaixaFaturamento(String faixaFaturamento) {
         this.faixaFaturamento = faixaFaturamento;
     }
 
-    public LocalDateTime getData() { return data; }
-    public void setData(LocalDateTime data) { this.data = data; }
+    public String getUf() {
+        return uf;
+    }
 
-    public int getDuracao() { return duracao; }
-    public void setDuracao(int duracao) { this.duracao = duracao; }
+    public void setUf(String uf) {
+        this.uf = uf;
+    }
 
-    public String getTextoOriginal() { return textoOriginal; }
-    public void setTextoOriginal(String textoOriginal) { this.textoOriginal = textoOriginal; }
+    public String getCnae() {
+        return cnae;
+    }
 
-    public int getPFalaVendedor() { return pFalaVendedor; }
-    public void setPFalaVendedor(int pFalaVendedor) { this.pFalaVendedor = pFalaVendedor; }
+    public void setCnae(String cnae) {
+        this.cnae = cnae;
+    }
 
-    public String getSegmento() { return segmento; }
-    public void setSegmento(String segmento) { this.segmento = segmento; }
+    public String getUnidade() {
+        return unidade;
+    }
 
-    public int getNotaNps() { return notaNps; }
-    public void setNotaNps(int notaNps) { this.notaNps = notaNps; }
+    public void setUnidade(String unidade) {
+        this.unidade = unidade;
+    }
 
-    public String getTipoRecurso() { return tipoRecurso; }
-    public void setTipoRecurso(String tipoRecurso) { this.tipoRecurso = tipoRecurso; }
+    public String getSegmento() {
+        return segmento;
+    }
 
-    public String getUf() { return uf; }
-    public void setUf(String uf) { this.uf = uf; }
+    public void setSegmento(String segmento) {
+        this.segmento = segmento;
+    }
 
-    public String getFaixaFaturamento() { return faixaFaturamento; }
-    public void setFaixaFaturamento(String faixaFaturamento) { this.faixaFaturamento = faixaFaturamento; }
+    public boolean isExterno() {
+        return externo;
+    }
+
+    public void setExterno(boolean externo) {
+        this.externo = externo;
+    }
+
+    public String getCodt() {
+        return codt;
+    }
+
+    public void setCodt(String codt) {
+        this.codt = codt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getFormato() {
+        return formato;
+    }
+
+    public void setFormato(String formato) {
+        this.formato = formato;
+    }
+
+    public String getTextoOriginal() {
+        return textoOriginal;
+    }
+
+    public void setTextoOriginal(String textoOriginal) {
+        this.textoOriginal = textoOriginal;
+    }
+
+    public int getDuracao() {
+        return duracao;
+    }
+
+    public void setDuracao(int duracao) {
+        this.duracao = duracao;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(LocalDateTime dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
+
+    public LocalDateTime getData() {
+        return data;
+    }
+
+    public void setData(LocalDateTime data) {
+        this.data = data;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {
         return "\n=== REUNIAO ===" +
+                "\nID: " + id +
                 "\nData: " + data +
                 "\nDuracao: " + duracao + " min" +
-                "\nPercentual Fala Vendedor: " + pFalaVendedor + "%" +
-                "\nSegmento: " + segmento +
-                "\nNPS: " + notaNps +
-                "\nTipo Recurso: " + tipoRecurso +
-                "\nUF: " + uf +
-                "\nFaixa Faturamento: " + faixaFaturamento;
+                "\nFormato: " + formato +
+                "\nStatus: " + status +
+                (segmento != null ? "\nSegmento: " + segmento : "") +
+                (unidade  != null ? "\nUnidade: "  + unidade  : "") +
+                (uf       != null ? "\nUF: "       + uf       : "") +
+                (faixaFaturamento != null ? "\nFaixa Faturamento: " + faixaFaturamento : "") +
+                (tipoRecurso     != null ? "\nTipo Recurso: " + tipoRecurso : "") +
+                (notaNps         != null ? "\nNPS: " + notaNps + "/10" : "");
     }
 }

@@ -82,7 +82,6 @@ public class TesteSistema {
     }
 
     // ───── Opção 2: Detalhes completos por ID ─────
-
     private static void opcaoDetalhesPorId() {
         String entrada = JOptionPane.showInputDialog(
                 null,
@@ -105,23 +104,23 @@ public class TesteSistema {
 
             Reuniao reuniao = reunioes.get(id - 1);
 
-            // Monta a Analise completa com todos os dados
             Analise analise = new Analise();
             analise.setReuniao(reuniao);
-
-            // Vendedor com dados derivados da reunião
-            Vendedor vendedor = new Vendedor();
-            vendedor.setNome("Vendedor TOTVS");
-            vendedor.setCargo("Consultor Comercial");
-            vendedor.setEmpresa("TOTVS S.A.");
-            vendedor.setTempoFala(reuniao.getPFalaVendedor());
-            vendedor.setMetaVendas(0);
-            vendedor.setConfiancaCliente(0);
-            analise.setVendedor(vendedor);
-
             analise.detectarReclamacoes();
+            analise.detectarAlertas();
             analise.detectarTomDeVoz();
             analise.calcularScore();
+
+            // Aplica bônus de NPS se disponível
+            Integer nps = reuniao.getNotaNps();
+            if (nps != null) {
+                int score = analise.getScoreGeral();
+                if (nps >= 9) score += 10;
+                else if (nps <= 6) score -= 10;
+                if (score > 100) score = 100;
+                if (score <   0) score = 0;
+                analise.setScoreGeral(score);
+            }
 
             exibirRelatorio("REUNIÃO #" + id + " — RELATÓRIO DETALHADO", analise.gerarRelatorio());
 
@@ -164,9 +163,10 @@ public class TesteSistema {
             if (r.getSegmento() != null &&
                     r.getSegmento().toLowerCase().contains(segmento.trim().toLowerCase())) {
                 resultado.append("\nReunião #").append(i + 1)
+                        .append(" | ID: ").append(r.getId())
                         .append(" | Data: ").append(r.getData())
-                        .append(" | UF: ").append(r.getUf())
-                        .append(" | NPS: ").append(r.getNotaNps())
+                        .append(" | UF: ").append(r.getUf() != null ? r.getUf() : "—")
+                        .append(" | NPS: ").append(r.getNotaNps() != null ? r.getNotaNps() : "—")
                         .append(" | Duração: ").append(r.getDuracao()).append(" min");
                 encontrados++;
             }

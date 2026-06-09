@@ -10,8 +10,8 @@ import java.util.List;
 
 public class LeitorArquivo {
 
-    // Caminho padrão — arquivo fica local, fora do GitHub
     private static final String CAMINHO_PADRAO = "src/resources/ANON_transcricao.json";
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private String caminhoArquivo;
     private List<Reuniao> reunioes;
@@ -42,7 +42,6 @@ public class LeitorArquivo {
         this.reunioes = reunioes;
     }
 
-    // ───── Leitura automática do caminho protegido ─────
     public List<Reuniao> lerArquivoAutomatico() {
         this.reunioes.clear();
 
@@ -56,7 +55,7 @@ public class LeitorArquivo {
             }
         } catch (IOException e) {
             System.err.println("Arquivo de transcrição não encontrado em: " + caminhoArquivo);
-            System.err.println("Coloque o arquivo ANON_transcricao.json em src/resources/ (não sobe pro GitHub).");
+            System.err.println("Coloque o arquivo ANON_transcricao.json em src/resources/");
         }
 
         return reunioes;
@@ -64,39 +63,48 @@ public class LeitorArquivo {
 
     private Reuniao parsearLinha(String json) {
         try {
-            Reuniao reuniao = new Reuniao();
+            Reuniao r = new Reuniao();
 
-            reuniao.setTextoOriginal(extrairValor(json, "ANON_TRANSCRICAO"));
-            reuniao.setSegmento(extrairValor(json, "NOME_SEGMENTO"));
-            reuniao.setUf(extrairValor(json, "UF"));
-            reuniao.setFaixaFaturamento(extrairValor(json, "FAIXA_FATURAMENTO_CLIENTE_EC"));
-            reuniao.setTipoRecurso(extrairValor(json, "TP_RECURSO"));
+            // ── Campos sempre presentes ──
+            r.setId(extrairString(json, "ID_MEETING"));
+            r.setTextoOriginal(extrairString(json, "ANON_TRANSCRICAO"));
+            r.setFormato(extrairString(json, "FORMATO_MEETING"));
+            r.setStatus(extrairString(json, "STATUS_MEETING"));
+            r.setCodt(extrairString(json, "CODT"));
+            r.setExterno(extrairBoolean(json, "FLG_EXTERNO"));
 
-            String duracaoStr = extrairValor(json, "DURACAO_MEETING");
-            if (duracaoStr != null && !duracaoStr.isEmpty()) {
-                if (duracaoStr.contains(":")) {
-                    String[] partes = duracaoStr.split(":");
-                    int horas = Integer.parseInt(partes[0]);
-                    int minutos = Integer.parseInt(partes[1]);
-                    int segundos = partes.length > 2 ? Integer.parseInt(partes[2]) : 0;
-                    reuniao.setDuracao((horas * 60) + minutos + (segundos >= 30 ? 1 : 0));
-                } else {
-                    reuniao.setDuracao((int) Double.parseDouble(duracaoStr));
-                }
+            String dtMeeting = extrairString(json, "DT_MEETING");
+            if (dtMeeting != null && !dtMeeting.isEmpty())
+                r.setData(LocalDateTime.parse(dtMeeting, FMT));
+
+            String dtCriacao = extrairString(json, "DT_CRIACAO");
+            if (dtCriacao != null && !dtCriacao.isEmpty())
+                r.setDataCriacao(LocalDateTime.parse(dtCriacao, FMT));
+
+            String durStr = extrairString(json, "DURACAO_MEETING");
+            if (durStr != null && !durStr.isEmpty()) {
+                String[] p = durStr.split(":");
+                int h = Integer.parseInt(p[0]);
+                int m = Integer.parseInt(p[1]);
+                int s = p.length > 2 ? Integer.parseInt(p[2]) : 0;
+                r.setDuracao((h * 60) + m + (s >= 30 ? 1 : 0));
             }
 
-            String npsStr = extrairValor(json, "NOTA_NPS");
+            // ── Campos opcionais (presentes em ~64% dos registros) ──
+            r.setSegmento(extrairOpcional(json, "NOME_SEGMENTO"));
+            r.setUnidade(extrairOpcional(json, "NOME_UNIDADE"));
+            r.setCnae(extrairOpcional(json, "CNAE"));
+            r.setUf(extrairOpcional(json, "UF"));
+            r.setFaixaFaturamento(extrairOpcional(json, "FAIXA_FATURAMENTO_CLIENTE_EC"));
+            r.setTipoRecurso(extrairOpcional(json, "TP_RECURSO"));
+
+            // ── NOTA_NPS: presente em ~26% dos registros ──
+            String npsStr = extrairOpcional(json, "NOTA_NPS");
             if (npsStr != null && !npsStr.isEmpty()) {
-                reuniao.setNotaNps((int) Double.parseDouble(npsStr));
+                r.setNotaNps((int) Double.parseDouble(npsStr));
             }
 
-            String dataStr = extrairValor(json, "DT_MEETING");
-            if (dataStr != null && !dataStr.isEmpty()) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                reuniao.setData(LocalDateTime.parse(dataStr, formatter));
-            }
-
-            return reuniao;
+            return r;
 
         } catch (Exception e) {
             System.err.println("Erro ao parsear linha: " + e.getMessage());
@@ -104,24 +112,60 @@ public class LeitorArquivo {
         }
     }
 
-    private String extrairValor(String json, String chave) {
+    /** Extrai campo sempre presente — retorna "" se não achar */
+    private String extrairString(String json, String chave) {
+        String v = extrairRaw(json, chave);
+        return v != null ? v : "";
+    }
+
+    /** Extrai campo opcional — retorna null se não achar (sem poluir o objeto) */
+    private String extrairOpcional(String json, String chave) {
+        return extrairRaw(json, chave);
+    }
+
+    /** Extrai booleano (true/false sem aspas no JSON) */
+    private boolean extrairBoolean(String json, String chave) {
         String busca = "\"" + chave + "\"";
         int idx = json.indexOf(busca);
-        if (idx == -1) return "";
+        if (idx == -1) return false;
+        int inicio = json.indexOf(":", idx) + 1;
+        while (inicio < json.length() && json.charAt(inicio) == ' ') inicio++;
+        return json.startsWith("true", inicio);
+    }
+
+    /** Núcleo da extração: retorna null se a chave não existe no objeto */
+    private String extrairRaw(String json, String chave) {
+        String busca = "\"" + chave + "\"";
+        int idx = json.indexOf(busca);
+        if (idx == -1) return null;   // chave ausente = campo não existe neste registro
 
         int inicio = json.indexOf(":", idx) + 1;
         while (inicio < json.length() && json.charAt(inicio) == ' ') inicio++;
-        if (json.startsWith("null", inicio)) return "";
+
+        if (json.startsWith("null", inicio)) return null;
 
         if (json.charAt(inicio) == '"') {
-            int fim = inicio + 1;
-            while (fim < json.length()) {
-                if (json.charAt(fim) == '"' && json.charAt(fim - 1) != '\\') break;
-                fim++;
+            StringBuilder sb = new StringBuilder();
+            int i = inicio + 1;
+            while (i < json.length()) {
+                char c = json.charAt(i);
+                if (c == '"' && json.charAt(i - 1) != '\\') break;
+                if (c == '\\' && i + 1 < json.length()) {
+                    char next = json.charAt(i + 1);
+                    switch (next) {
+                        case 'n'  -> { sb.append('\n'); i += 2; continue; }
+                        case 't'  -> { sb.append('\t'); i += 2; continue; }
+                        case '"'  -> { sb.append('"');  i += 2; continue; }
+                        case '\\' -> { sb.append('\\'); i += 2; continue; }
+                    }
+                }
+                sb.append(c);
+                i++;
             }
-            return json.substring(inicio + 1, fim);
+            return sb.toString();
         }
 
+        // valor numérico ou booleano sem aspas
         int fim = inicio;
         while (fim < json.length() && json.charAt(fim) != ',' && json.charAt(fim) != '}') fim++;
         return json.substring(inicio, fim).trim();

@@ -127,6 +127,63 @@ public class Analise {
         return score;
     }
 
+    public List<Alerta> detectarAlertas() {
+        String texto = reuniao.getTextoOriginal().toLowerCase();
+
+        // Risco de churn
+        List<String> sinaisChurn = List.of(
+                "cancelar", "cancelamento", "rescindir", "rescisão", "sair do contrato",
+                "nao vou renovar", "não vou renovar", "encerrar contrato", "desistir"
+        );
+        for (String sinal : sinaisChurn) {
+            if (texto.contains(sinal)) {
+                alertas.add(new Alerta(
+                        "CHURN",
+                        "Sinal de risco de cancelamento detectado",
+                        "ALTA",
+                        sinal
+                ));
+                break; // um alerta de churn é suficiente
+            }
+        }
+
+        // Menção de concorrente
+        List<String> sinaisConcorrente = List.of(
+                "concorrente", "outro sistema", "outra solução", "sap", "oracle",
+                "senior", "datasul", "linx", "protheus", "rm ", "fluig"
+        );
+        for (String sinal : sinaisConcorrente) {
+            if (texto.contains(sinal)) {
+                alertas.add(new Alerta(
+                        "CONCORRENTE",
+                        "Menção a sistema ou empresa concorrente",
+                        "MEDIA",
+                        sinal
+                ));
+                break;
+            }
+        }
+
+        // Oportunidade de expansão
+        List<String> sinaisOportunidade = List.of(
+                "expandir", "ampliar", "novo módulo", "novo modulo", "contratar mais",
+                "outros setores", "outras filiais", "crescimento", "implantar mais"
+        );
+        for (String sinal : sinaisOportunidade) {
+            if (texto.contains(sinal)) {
+                alertas.add(new Alerta(
+                        "OPORTUNIDADE",
+                        "Sinal de possibilidade de expansão do contrato",
+                        "BAIXA",
+                        sinal
+                ));
+                break;
+            }
+        }
+
+        return alertas;
+    }
+
     public String gerarRelatorio() {
         StringBuilder sb = new StringBuilder();
 
@@ -137,67 +194,33 @@ public class Analise {
         // ── Dados da Reunião ──
         if (reuniao != null) {
             sb.append("\n\n┌─ DADOS DA REUNIÃO ───────────────────────");
-            sb.append("\n  Data e Hora  : ").append(reuniao.getData() != null ? reuniao.getData() : "Não informado");
-            sb.append("\n  Duração      : ").append(reuniao.getDuracao()).append(" minutos");
-            sb.append("\n  Tipo Recurso : ").append(reuniao.getTipoRecurso() != null ? reuniao.getTipoRecurso() : "Não informado");
-            sb.append("\n  UF           : ").append(reuniao.getUf() != null ? reuniao.getUf() : "Não informado");
-            sb.append("\n  Segmento     : ").append(reuniao.getSegmento() != null ? reuniao.getSegmento() : "Não informado");
-            sb.append("\n  Faturamento  : ").append(reuniao.getFaixaFaturamento() != null ? reuniao.getFaixaFaturamento() : "Não informado");
-            sb.append("\n  NPS          : ").append(reuniao.getNotaNps()).append("/10");
-            sb.append("\n  Fala Vendedor: ").append(reuniao.getPFalaVendedor()).append("%");
-            sb.append("\n└──────────────────────────────────────────");
-        }
+            sb.append("\n  ID           : ").append(reuniao.getId());
+            sb.append("\n  Data         : ").append(reuniao.getData() != null ? reuniao.getData() : "Não informado");
+            sb.append("\n  Duração      : ").append(reuniao.getDuracao()).append(" min");
+            sb.append("\n  Formato      : ").append(reuniao.getFormato() != null ? reuniao.getFormato() : "Não informado");
+            sb.append("\n  Externo      : ").append(reuniao.isExterno() ? "Sim" : "Não");
 
-        // ── Dados do Vendedor ──
-        if (vendedor != null) {
-            sb.append("\n\n┌─ VENDEDOR ───────────────────────────────");
-            sb.append("\n  Nome         : ").append(vendedor.getNome() != null ? vendedor.getNome() : "Não informado");
-            sb.append("\n  Cargo        : ").append(vendedor.getCargo() != null ? vendedor.getCargo() : "Não informado");
-            sb.append("\n  Empresa      : ").append(vendedor.getEmpresa() != null ? vendedor.getEmpresa() : "Não informado");
-            sb.append("\n  Meta de Vendas: R$ ").append(String.format("%.2f", vendedor.getMetaVendas()));
-            sb.append("\n  Tempo de Fala: ").append(vendedor.getTempoFala()).append("s");
-            sb.append("\n  Confiança    : ").append(vendedor.getConfiancaCliente()).append("/100");
-            sb.append("\n└──────────────────────────────────────────");
-        }
+            // Campos opcionais — só exibe se existirem
+            if (reuniao.getUf()              != null) sb.append("\n  UF           : ").append(reuniao.getUf());
+            if (reuniao.getSegmento()        != null) sb.append("\n  Segmento     : ").append(reuniao.getSegmento());
+            if (reuniao.getUnidade()         != null) sb.append("\n  Unidade      : ").append(reuniao.getUnidade());
+            if (reuniao.getFaixaFaturamento()!= null) sb.append("\n  Faturamento  : ").append(reuniao.getFaixaFaturamento());
+            if (reuniao.getTipoRecurso()     != null) sb.append("\n  Tipo Recurso : ").append(reuniao.getTipoRecurso());
+            if (reuniao.getNotaNps()         != null) sb.append("\n  NPS          : ").append(reuniao.getNotaNps()).append("/10");
 
-        // ── Dados do Cliente ──
-        if (cliente != null) {
-            sb.append("\n\n┌─ CLIENTE ────────────────────────────────");
-            sb.append("\n  Nome         : ").append(cliente.getNome() != null ? cliente.getNome() : "Não informado");
-            sb.append("\n  Cargo        : ").append(cliente.getCargo() != null ? cliente.getCargo() : "Não informado");
-            sb.append("\n  Empresa      : ").append(cliente.getEmpresa() != null ? cliente.getEmpresa() : "Não informado");
-            sb.append("\n  Budget       : R$ ").append(String.format("%.2f", cliente.getBudget()));
-            sb.append("\n  Tipo Decisão : ").append(cliente.getTipoDecisao() != null ? cliente.getTipoDecisao() : "Não informado");
-            sb.append("\n  Satisfação   : ").append(cliente.getSatisfacao() != null ? cliente.getSatisfacao() : "Não informado");
-            sb.append("\n  Cit. Concorrente: ").append(cliente.isMencionouConcorrente() ? "⚠ SIM" : "Não");
             sb.append("\n└──────────────────────────────────────────");
         }
 
         // ── Análise de Sentimento e Score ──
         sb.append("\n\n┌─ ANÁLISE ────────────────────────────────");
         sb.append("\n  Sentimento   : ").append(sentimento != null ? sentimento : "Não detectado");
-        sb.append("\n  Tom de Voz   : ").append(tomDeVoz != null ? tomDeVoz : "Não detectado");
+        sb.append("\n  Tom de Voz   : ").append(tomDeVoz   != null ? tomDeVoz   : "Não detectado");
         sb.append("\n  Score Geral  : ").append(scoreGeral).append("/100");
 
-        // Barra visual do score
         int blocos = scoreGeral / 10;
         sb.append("\n  Score Visual : [");
         for (int i = 0; i < 10; i++) sb.append(i < blocos ? "█" : "░");
         sb.append("] ").append(scoreGeral).append("%");
-        sb.append("\n└──────────────────────────────────────────");
-
-        // ── Produtos ──
-        sb.append("\n\n┌─ PRODUTOS MENCIONADOS ───────────────────");
-        if (produtos == null || produtos.isEmpty()) {
-            sb.append("\n  Nenhum produto identificado na transcrição.");
-        } else {
-            for (Produto p : produtos) {
-                sb.append("\n  • ").append(p.getNome())
-                        .append(" | Categoria: ").append(p.getCategoria())
-                        .append(" | Status: ").append(p.getStatus())
-                        .append(" | Versão: ").append(p.getVersaoMencao());
-            }
-        }
         sb.append("\n└──────────────────────────────────────────");
 
         // ── Alertas ──
@@ -220,8 +243,8 @@ public class Analise {
         if (reclamacoes == null || reclamacoes.isEmpty()) {
             sb.append("\n  Nenhuma reclamação identificada.");
         } else {
-            for (String r : reclamacoes) {
-                sb.append("\n  ✗ ").append(r);
+            for (String rec : reclamacoes) {
+                sb.append("\n  ✗ ").append(rec);
             }
         }
         sb.append("\n└──────────────────────────────────────────");
@@ -271,6 +294,17 @@ public class Analise {
         } else {
             this.tomDeVoz = "NEUTRO";
         }
+
+        if (this.tomDeVoz.equals("POSITIVO")) {
+            this.sentimento = "Satisfeito";
+        } else if (this.tomDeVoz.equals("AGRESSIVO")) {
+            this.sentimento = "Insatisfeito";
+        } else if (this.tomDeVoz.equals("ANSIOSO")) {
+            this.sentimento = "Ansioso";
+        } else {
+            this.sentimento = "Neutro";
+        }
+
 
         return this.tomDeVoz;
     }
