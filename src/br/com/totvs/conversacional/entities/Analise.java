@@ -110,8 +110,8 @@ public class Analise {
         int score = 50;
 
         if (sentimento != null) {
-            if (sentimento.equals("POSITIVO")) score += 20;
-            if (sentimento.equals("NEGATIVO")) score -= 20;
+            if (sentimento.equals("Satisfeito")) score += 20;
+            if (sentimento.equals("Insatisfeito")) score -= 20;
         }
 
         for (Alerta alertaAtual : alertas) {
