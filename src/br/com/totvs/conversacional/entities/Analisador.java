@@ -1,7 +1,4 @@
-package br.com.totvs.conversacional.services;
-
-import br.com.totvs.conversacional.entities.Analise;
-import br.com.totvs.conversacional.entities.Reuniao;
+package br.com.totvs.conversacional.entities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +11,6 @@ public class Analisador {
         this.analises = new ArrayList<>();
     }
 
-
     public List<Analise> getAnalises() {
         return analises;
     }
@@ -23,37 +19,28 @@ public class Analisador {
         this.analises = analises;
     }
 
-
-
     public List<Analise> analisarReunioes(List<Reuniao> reunioes) {
         this.analises.clear();
 
         for (Reuniao reuniao : reunioes) {
             Analise analise = new Analise();
             analise.setReuniao(reuniao);
-
             analise.detectarReclamacoes();
             analise.detectarTomDeVoz();
             analise.calcularScore();
-
             aplicarBonusNps(analise);
-
             this.analises.add(analise);
         }
 
         return this.analises;
     }
 
-
     private void aplicarBonusNps(Analise analise) {
         int nps = analise.getReuniao().getNotaNps();
         int score = analise.getScoreGeral();
 
-        if (nps >= 9) {
-            score += 10;
-        } else if (nps <= 6) {
-            score -= 10;
-        }
+        if (nps >= 9) score += 10;
+        else if (nps <= 6) score -= 10;
 
         if (score > 100) score = 100;
         if (score < 0) score = 0;
@@ -61,14 +48,10 @@ public class Analisador {
         analise.setScoreGeral(score);
     }
 
-
     @Override
     public String toString() {
         int total = analises.size();
-        int positivos = 0;
-        int agressivos = 0;
-        int ansiosos = 0;
-        int criticos = 0;
+        int positivos = 0, agressivos = 0, ansiosos = 0, criticos = 0;
 
         for (Analise a : analises) {
             String tom = a.getTomDeVoz();
