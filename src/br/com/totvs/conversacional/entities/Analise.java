@@ -13,6 +13,7 @@ public class Analise {
     private List<Produto> produtos;
     private List<Alerta> alertas;
     private List<String> reclamacoes;
+    private Vendedor vendedor;
 
     public Analise() {
         this.produtos = new ArrayList<>();
@@ -95,6 +96,14 @@ public class Analise {
         this.reclamacoes = reclamacoes;
     }
 
+    public Vendedor getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(Vendedor vendedor) {
+        this.vendedor = vendedor;
+    }
+
     // ───── Métodos ─────
 
     public int calcularScore() {
@@ -121,64 +130,106 @@ public class Analise {
     public String gerarRelatorio() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("\n========================================");
-        sb.append("\n        RELATORIO DE REUNIAO TOTVS      ");
-        sb.append("\n========================================");
+        sb.append("\n╔══════════════════════════════════════════╗");
+        sb.append("\n║     RELATÓRIO DETALHADO - TOTVS          ║");
+        sb.append("\n╚══════════════════════════════════════════╝");
 
+        // ── Dados da Reunião ──
         if (reuniao != null) {
-            sb.append("\n\n--- DADOS DA REUNIAO ---");
-            sb.append("\nData: ").append(reuniao.getData());
-            sb.append("\nDuracao: ").append(reuniao.getDuracao()).append(" min");
-            sb.append("\nTipo Recurso: ").append(reuniao.getTipoRecurso());
-            sb.append("\nUF: ").append(reuniao.getUf());
-            sb.append("\nSegmento: ").append(reuniao.getSegmento());
-            sb.append("\nFaixa Faturamento: ").append(reuniao.getFaixaFaturamento());
-            sb.append("\nNPS: ").append(reuniao.getNotaNps());
+            sb.append("\n\n┌─ DADOS DA REUNIÃO ───────────────────────");
+            sb.append("\n  Data e Hora  : ").append(reuniao.getData() != null ? reuniao.getData() : "Não informado");
+            sb.append("\n  Duração      : ").append(reuniao.getDuracao()).append(" minutos");
+            sb.append("\n  Tipo Recurso : ").append(reuniao.getTipoRecurso() != null ? reuniao.getTipoRecurso() : "Não informado");
+            sb.append("\n  UF           : ").append(reuniao.getUf() != null ? reuniao.getUf() : "Não informado");
+            sb.append("\n  Segmento     : ").append(reuniao.getSegmento() != null ? reuniao.getSegmento() : "Não informado");
+            sb.append("\n  Faturamento  : ").append(reuniao.getFaixaFaturamento() != null ? reuniao.getFaixaFaturamento() : "Não informado");
+            sb.append("\n  NPS          : ").append(reuniao.getNotaNps()).append("/10");
+            sb.append("\n  Fala Vendedor: ").append(reuniao.getPFalaVendedor()).append("%");
+            sb.append("\n└──────────────────────────────────────────");
         }
 
+        // ── Dados do Vendedor ──
+        if (vendedor != null) {
+            sb.append("\n\n┌─ VENDEDOR ───────────────────────────────");
+            sb.append("\n  Nome         : ").append(vendedor.getNome() != null ? vendedor.getNome() : "Não informado");
+            sb.append("\n  Cargo        : ").append(vendedor.getCargo() != null ? vendedor.getCargo() : "Não informado");
+            sb.append("\n  Empresa      : ").append(vendedor.getEmpresa() != null ? vendedor.getEmpresa() : "Não informado");
+            sb.append("\n  Meta de Vendas: R$ ").append(String.format("%.2f", vendedor.getMetaVendas()));
+            sb.append("\n  Tempo de Fala: ").append(vendedor.getTempoFala()).append("s");
+            sb.append("\n  Confiança    : ").append(vendedor.getConfiancaCliente()).append("/100");
+            sb.append("\n└──────────────────────────────────────────");
+        }
+
+        // ── Dados do Cliente ──
         if (cliente != null) {
-            sb.append("\n\n--- DADOS DO CLIENTE ---");
-            sb.append("\nNome: ").append(cliente.getNome());
-            sb.append("\nCargo: ").append(cliente.getCargo());
-            sb.append("\nEmpresa: ").append(cliente.getEmpresa());
+            sb.append("\n\n┌─ CLIENTE ────────────────────────────────");
+            sb.append("\n  Nome         : ").append(cliente.getNome() != null ? cliente.getNome() : "Não informado");
+            sb.append("\n  Cargo        : ").append(cliente.getCargo() != null ? cliente.getCargo() : "Não informado");
+            sb.append("\n  Empresa      : ").append(cliente.getEmpresa() != null ? cliente.getEmpresa() : "Não informado");
+            sb.append("\n  Budget       : R$ ").append(String.format("%.2f", cliente.getBudget()));
+            sb.append("\n  Tipo Decisão : ").append(cliente.getTipoDecisao() != null ? cliente.getTipoDecisao() : "Não informado");
+            sb.append("\n  Satisfação   : ").append(cliente.getSatisfacao() != null ? cliente.getSatisfacao() : "Não informado");
+            sb.append("\n  Cit. Concorrente: ").append(cliente.isMencionouConcorrente() ? "⚠ SIM" : "Não");
+            sb.append("\n└──────────────────────────────────────────");
         }
 
-        sb.append("\n\n--- ANALISE ---");
-        sb.append("\nSentimento: ").append(sentimento);
-        sb.append("\nTom de Voz: ").append(tomDeVoz);
-        sb.append("\nScore Geral: ").append(scoreGeral).append("/100");
+        // ── Análise de Sentimento e Score ──
+        sb.append("\n\n┌─ ANÁLISE ────────────────────────────────");
+        sb.append("\n  Sentimento   : ").append(sentimento != null ? sentimento : "Não detectado");
+        sb.append("\n  Tom de Voz   : ").append(tomDeVoz != null ? tomDeVoz : "Não detectado");
+        sb.append("\n  Score Geral  : ").append(scoreGeral).append("/100");
 
-        sb.append("\n\n--- PRODUTOS IDENTIFICADOS ---");
-        if (produtos.isEmpty()) {
-            sb.append("\nNenhum produto identificado.");
+        // Barra visual do score
+        int blocos = scoreGeral / 10;
+        sb.append("\n  Score Visual : [");
+        for (int i = 0; i < 10; i++) sb.append(i < blocos ? "█" : "░");
+        sb.append("] ").append(scoreGeral).append("%");
+        sb.append("\n└──────────────────────────────────────────");
+
+        // ── Produtos ──
+        sb.append("\n\n┌─ PRODUTOS MENCIONADOS ───────────────────");
+        if (produtos == null || produtos.isEmpty()) {
+            sb.append("\n  Nenhum produto identificado na transcrição.");
         } else {
             for (Produto p : produtos) {
-                sb.append("\n- ").append(p.getNome())
-                        .append(" | ").append(p.getCategoria())
-                        .append(" | ").append(p.getStatus());
+                sb.append("\n  • ").append(p.getNome())
+                        .append(" | Categoria: ").append(p.getCategoria())
+                        .append(" | Status: ").append(p.getStatus())
+                        .append(" | Versão: ").append(p.getVersaoMencao());
             }
         }
+        sb.append("\n└──────────────────────────────────────────");
 
-        sb.append("\n\n--- ALERTAS ---");
-        if (alertas.isEmpty()) {
-            sb.append("\nNenhum alerta identificado.");
+        // ── Alertas ──
+        sb.append("\n\n┌─ ALERTAS ────────────────────────────────");
+        if (alertas == null || alertas.isEmpty()) {
+            sb.append("\n  Nenhum alerta identificado.");
         } else {
             for (Alerta a : alertas) {
-                sb.append("\n- [").append(a.getUrgencia()).append("] ")
+                sb.append("\n  ⚑ [").append(a.getUrgencia()).append("] ")
                         .append(a.getTipo()).append(": ").append(a.getDescricao());
+                if (a.getTrechoOrigem() != null && !a.getTrechoOrigem().isEmpty()) {
+                    sb.append("\n    Trecho: \"").append(a.getTrechoOrigem()).append("\"");
+                }
             }
         }
+        sb.append("\n└──────────────────────────────────────────");
 
-        sb.append("\n\n--- RECLAMACOES ---");
-        if (reclamacoes.isEmpty()) {
-            sb.append("\nNenhuma reclamacao identificada.");
+        // ── Reclamações ──
+        sb.append("\n\n┌─ RECLAMAÇÕES DETECTADAS ─────────────────");
+        if (reclamacoes == null || reclamacoes.isEmpty()) {
+            sb.append("\n  Nenhuma reclamação identificada.");
         } else {
             for (String r : reclamacoes) {
-                sb.append("\n- ").append(r);
+                sb.append("\n  ✗ ").append(r);
             }
         }
+        sb.append("\n└──────────────────────────────────────────");
 
-        sb.append("\n========================================");
+        sb.append("\n\n╔══════════════════════════════════════════╗");
+        sb.append("\n║            FIM DO RELATÓRIO              ║");
+        sb.append("\n╚══════════════════════════════════════════╝");
+
         return sb.toString();
     }
 

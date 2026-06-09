@@ -4,8 +4,11 @@ import br.com.totvs.conversacional.entities.Analise;
 import br.com.totvs.conversacional.entities.Analisador;
 import br.com.totvs.conversacional.entities.LeitorArquivo;
 import br.com.totvs.conversacional.entities.Reuniao;
+import br.com.totvs.conversacional.entities.Vendedor;
 
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import java.util.List;
 
 public class TesteSistema {
@@ -33,18 +36,14 @@ public class TesteSistema {
             return;
         }
 
-        JOptionPane.showMessageDialog(null,
-                "Arquivo carregado com sucesso!\n" + leitor.toString(),
-                "Sistema TOTVS",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        exibirDialogo("Arquivo carregado com sucesso!\n" + leitor.toString(), "Sistema TOTVS");
 
         // ───── Menu principal ─────
         boolean rodando = true;
         while (rodando) {
             String[] opcoes = {
                     "1 - Analisar todas as reuniões",
-                    "2 - Analisar reunião por ID",
+                    "2 - Ver detalhes de uma reunião por ID",
                     "3 - Exibir resumo geral",
                     "4 - Buscar por segmento",
                     "5 - Sair"
@@ -52,7 +51,7 @@ public class TesteSistema {
 
             String escolha = (String) JOptionPane.showInputDialog(
                     null,
-                    "Selecione uma opção:",
+                    "Selecione uma opção:\n(" + reunioes.size() + " reuniões carregadas)",
                     "Sistema TOTVS - Menu Principal",
                     JOptionPane.PLAIN_MESSAGE,
                     null,
@@ -64,35 +63,31 @@ public class TesteSistema {
 
             switch (escolha.charAt(0)) {
                 case '1' -> opcaoAnalisarTodas();
-                case '2' -> opcaoAnalisarPorId();
+                case '2' -> opcaoDetalhesPorId();
                 case '3' -> opcaoResumoGeral();
                 case '4' -> opcaoBuscarSegmento();
                 case '5' -> rodando = false;
             }
         }
 
-        JOptionPane.showMessageDialog(null,
-                "Sistema encerrado. Até logo!",
-                "Sistema TOTVS",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        exibirDialogo("Sistema encerrado. Até logo!", "Sistema TOTVS");
     }
+
+    // ───── Opção 1: Analisar todas ─────
 
     private static void opcaoAnalisarTodas() {
         analises = analisador.analisarReunioes(reunioes);
-        JOptionPane.showMessageDialog(null,
-                analises.size() + " reuniões analisadas com sucesso!\n" +
-                        "Use a opção 3 para ver o resumo geral.",
-                "Análise Concluída",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        exibirDialogo(analises.size() + " reuniões analisadas com sucesso!\n" +
+                "Use a opção 3 para ver o resumo geral.", "Análise Concluída");
     }
 
-    private static void opcaoAnalisarPorId() {
+    // ───── Opção 2: Detalhes completos por ID ─────
+
+    private static void opcaoDetalhesPorId() {
         String entrada = JOptionPane.showInputDialog(
                 null,
                 "Informe o número da reunião (1 a " + reunioes.size() + "):",
-                "Analisar por ID",
+                "Ver Detalhes por ID",
                 JOptionPane.QUESTION_MESSAGE
         );
 
@@ -109,17 +104,26 @@ public class TesteSistema {
             }
 
             Reuniao reuniao = reunioes.get(id - 1);
+
+            // Monta a Analise completa com todos os dados
             Analise analise = new Analise();
             analise.setReuniao(reuniao);
+
+            // Vendedor com dados derivados da reunião
+            Vendedor vendedor = new Vendedor();
+            vendedor.setNome("Vendedor TOTVS");
+            vendedor.setCargo("Consultor Comercial");
+            vendedor.setEmpresa("TOTVS S.A.");
+            vendedor.setTempoFala(reuniao.getPFalaVendedor());
+            vendedor.setMetaVendas(0);
+            vendedor.setConfiancaCliente(0);
+            analise.setVendedor(vendedor);
+
             analise.detectarReclamacoes();
             analise.detectarTomDeVoz();
             analise.calcularScore();
 
-            JOptionPane.showMessageDialog(null,
-                    reuniao.toString() + "\n" + analise.toString(),
-                    "Reunião #" + id,
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            exibirRelatorio("REUNIÃO #" + id + " — RELATÓRIO DETALHADO", analise.gerarRelatorio());
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null,
@@ -128,6 +132,8 @@ public class TesteSistema {
         }
     }
 
+    // ───── Opção 3: Resumo geral ─────
+
     private static void opcaoResumoGeral() {
         if (analises == null || analises.isEmpty()) {
             JOptionPane.showMessageDialog(null,
@@ -135,12 +141,10 @@ public class TesteSistema {
                     "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        JOptionPane.showMessageDialog(null,
-                analisador.toString(),
-                "Resumo Geral",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        exibirRelatorio("Resumo Geral", analisador.toString());
     }
+
+    // ───── Opção 4: Buscar por segmento ─────
 
     private static void opcaoBuscarSegmento() {
         String segmento = JOptionPane.showInputDialog(
@@ -155,10 +159,15 @@ public class TesteSistema {
         StringBuilder resultado = new StringBuilder();
         int encontrados = 0;
 
-        for (Reuniao r : reunioes) {
+        for (int i = 0; i < reunioes.size(); i++) {
+            Reuniao r = reunioes.get(i);
             if (r.getSegmento() != null &&
                     r.getSegmento().toLowerCase().contains(segmento.trim().toLowerCase())) {
-                resultado.append(r.toString()).append("\n");
+                resultado.append("\nReunião #").append(i + 1)
+                        .append(" | Data: ").append(r.getData())
+                        .append(" | UF: ").append(r.getUf())
+                        .append(" | NPS: ").append(r.getNotaNps())
+                        .append(" | Duração: ").append(r.getDuracao()).append(" min");
                 encontrados++;
             }
         }
@@ -168,10 +177,28 @@ public class TesteSistema {
                     "Nenhuma reunião encontrada para o segmento: " + segmento,
                     "Busca por Segmento", JOptionPane.WARNING_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(null,
-                    encontrados + " reunião(ões) encontrada(s) para: " + segmento +
-                            "\n\n" + resultado,
-                    "Busca por Segmento", JOptionPane.INFORMATION_MESSAGE);
+            exibirRelatorio("Busca por Segmento: " + segmento,
+                    encontrados + " reunião(ões) encontrada(s):\n" + resultado);
         }
+    }
+
+    // ───── Utilitários de exibição ─────
+
+    // Diálogo simples para mensagens curtas
+    private static void exibirDialogo(String mensagem, String titulo) {
+        JOptionPane.showMessageDialog(null, mensagem, titulo, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Diálogo com scroll para relatórios longos
+    private static void exibirRelatorio(String titulo, String conteudo) {
+        JTextArea textArea = new JTextArea(conteudo);
+        textArea.setEditable(false);
+        textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 13));
+        textArea.setCaretPosition(0);
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new java.awt.Dimension(620, 480));
+
+        JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 }
