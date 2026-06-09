@@ -1,9 +1,9 @@
 package br.com.totvs.conversacional.main;
 
 import br.com.totvs.conversacional.entities.Analise;
+import br.com.totvs.conversacional.entities.Analisador;
+import br.com.totvs.conversacional.entities.LeitorArquivo;
 import br.com.totvs.conversacional.entities.Reuniao;
-import br.com.totvs.conversacional.repository.LeitorArquivo;
-import br.com.totvs.conversacional.services.Analisador;
 
 import javax.swing.JOptionPane;
 import java.util.List;
@@ -17,25 +17,19 @@ public class TesteSistema {
 
     public static void main(String[] args) {
 
-        // ───── Inicialização ─────
-        String caminho = JOptionPane.showInputDialog(
-                null,
-                "Informe o caminho do arquivo NDJSON:",
-                "Sistema TOTVS - Inteligência Conversacional",
-                JOptionPane.QUESTION_MESSAGE
-        );
-
-        if (caminho == null || caminho.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Caminho inválido. Encerrando sistema.");
-            return;
-        }
-
-        leitor = new LeitorArquivo(caminho.trim());
+        // ───── Carregamento automático ─────
+        leitor = new LeitorArquivo();
         analisador = new Analisador();
-        reunioes = leitor.lerArquivo();
+        reunioes = leitor.lerArquivoAutomatico();
 
         if (reunioes.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Nenhuma reunião encontrada no arquivo. Encerrando sistema.");
+            JOptionPane.showMessageDialog(null,
+                    "Arquivo de transcrição não encontrado.\n" +
+                            "Coloque o arquivo ANON_transcricao.json em src/resources/\n" +
+                            "(essa pasta está no .gitignore para proteger os dados).",
+                    "Sistema TOTVS - Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -84,11 +78,8 @@ public class TesteSistema {
         );
     }
 
-    // ───── Opção 1: Analisar todas ─────
-
     private static void opcaoAnalisarTodas() {
         analises = analisador.analisarReunioes(reunioes);
-
         JOptionPane.showMessageDialog(null,
                 analises.size() + " reuniões analisadas com sucesso!\n" +
                         "Use a opção 3 para ver o resumo geral.",
@@ -96,8 +87,6 @@ public class TesteSistema {
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
-
-    // ───── Opção 2: Analisar por ID ─────
 
     private static void opcaoAnalisarPorId() {
         String entrada = JOptionPane.showInputDialog(
@@ -115,9 +104,7 @@ public class TesteSistema {
             if (id < 1 || id > reunioes.size()) {
                 JOptionPane.showMessageDialog(null,
                         "ID inválido. Informe um número entre 1 e " + reunioes.size(),
-                        "Erro",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                        "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -137,32 +124,23 @@ public class TesteSistema {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null,
                     "Entrada inválida. Digite apenas números.",
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    // ───── Opção 3: Resumo geral ─────
 
     private static void opcaoResumoGeral() {
         if (analises == null || analises.isEmpty()) {
             JOptionPane.showMessageDialog(null,
                     "Nenhuma análise realizada ainda.\nUse a opção 1 primeiro.",
-                    "Aviso",
-                    JOptionPane.WARNING_MESSAGE
-            );
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         JOptionPane.showMessageDialog(null,
                 analisador.toString(),
                 "Resumo Geral",
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
-
-    // ───── Opção 4: Buscar por segmento ─────
 
     private static void opcaoBuscarSegmento() {
         String segmento = JOptionPane.showInputDialog(
@@ -188,16 +166,12 @@ public class TesteSistema {
         if (encontrados == 0) {
             JOptionPane.showMessageDialog(null,
                     "Nenhuma reunião encontrada para o segmento: " + segmento,
-                    "Busca por Segmento",
-                    JOptionPane.WARNING_MESSAGE
-            );
+                    "Busca por Segmento", JOptionPane.WARNING_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(null,
                     encontrados + " reunião(ões) encontrada(s) para: " + segmento +
                             "\n\n" + resultado,
-                    "Busca por Segmento",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                    "Busca por Segmento", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }
