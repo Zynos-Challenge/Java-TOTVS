@@ -56,10 +56,6 @@ public class Cliente extends Participante {
         this.mencionouConcorrente = mencionouConcorrente;
     }
 
-    @Override
-    public String apresentar() {
-        return "Cliente: " + nome + " | Empresa: " + empresa;
-    }
 
     @Override
     public String toString() {

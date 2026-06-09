@@ -39,8 +39,7 @@ public abstract class Participante {
         this.empresa = empresa;
     }
 
-    //metodo abstrato para cada filho implementar de um jeito
-    public abstract String apresentar();
+
 
     @Override
     public String toString() {

@@ -46,10 +46,7 @@ public class Vendedor extends Participante {
         this.confiancaCliente = confiancaCliente;
     }
 
-    @Override
-    public String apresentar() {
-        return "Vendedor: " + nome + " | Empresa: " + empresa;
-    }
+
 
     @Override
     public String toString() {

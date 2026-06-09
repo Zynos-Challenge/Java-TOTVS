@@ -45,10 +45,7 @@ public class Gestor extends Participante{
         this.resistencia = resistencia;
     }
 
-    @Override
-    public String apresentar() {
-        return "Gestor: " + nome + " | Empresa: " + empresa;
-    }
+
 
     @Override
     public String toString() {
