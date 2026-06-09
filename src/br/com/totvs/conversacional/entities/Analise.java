@@ -1,10 +1,9 @@
 package br.com.totvs.conversacional.entities;
 
-import br.com.totvs.conversacional.interfaces.IAnalisavel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Analise implements IAnalisavel {
+public class Analise {
 
     private Reuniao reuniao;
     private Cliente cliente;
@@ -15,7 +14,7 @@ public class Analise implements IAnalisavel {
     private List<Alerta> alertas;
     private List<String> reclamacoes;
 
-    public Analise(){
+    public Analise() {
         this.produtos = new ArrayList<>();
         this.alertas = new ArrayList<>();
         this.reclamacoes = new ArrayList<>();
@@ -32,33 +31,72 @@ public class Analise implements IAnalisavel {
         this.reclamacoes = new ArrayList<>();
     }
 
-    public Reuniao getReuniao() { return reuniao; }
-    public void setReuniao(Reuniao reuniao) { this.reuniao = reuniao; }
+    public Reuniao getReuniao() {
+        return reuniao;
+    }
 
-    public Cliente getCliente() { return cliente; }
-    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+    public void setReuniao(Reuniao reuniao) {
+        this.reuniao = reuniao;
+    }
 
-    public String getSentimento() { return sentimento; }
-    public void setSentimento(String sentimento) { this.sentimento = sentimento; }
+    public Cliente getCliente() {
+        return cliente;
+    }
 
-    public String getTomDeVoz() { return tomDeVoz; }
-    public void setTomDeVoz(String tomDeVoz) { this.tomDeVoz = tomDeVoz; }
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
 
-    public int getScoreGeral() { return scoreGeral; }
-    public void setScoreGeral(int scoreGeral) { this.scoreGeral = scoreGeral; }
+    public String getSentimento() {
+        return sentimento;
+    }
 
-    public List<Produto> getProdutos() { return produtos; }
-    public void setProdutos(List<Produto> produtos) { this.produtos = produtos; }
+    public void setSentimento(String sentimento) {
+        this.sentimento = sentimento;
+    }
 
-    public List<Alerta> getAlertas() { return alertas; }
-    public void setAlertas(List<Alerta> alertas) { this.alertas = alertas; }
+    public String getTomDeVoz() {
+        return tomDeVoz;
+    }
 
-    public List<String> getReclamacoes() { return reclamacoes; }
-    public void setReclamacoes(List<String> reclamacoes) { this.reclamacoes = reclamacoes; }
+    public void setTomDeVoz(String tomDeVoz) {
+        this.tomDeVoz = tomDeVoz;
+    }
 
-    // ───── IAnalisavel ─────
+    public int getScoreGeral() {
+        return scoreGeral;
+    }
 
-    @Override
+    public void setScoreGeral(int scoreGeral) {
+        this.scoreGeral = scoreGeral;
+    }
+
+    public List<Produto> getProdutos() {
+        return produtos;
+    }
+
+    public void setProdutos(List<Produto> produtos) {
+        this.produtos = produtos;
+    }
+
+    public List<Alerta> getAlertas() {
+        return alertas;
+    }
+
+    public void setAlertas(List<Alerta> alertas) {
+        this.alertas = alertas;
+    }
+
+    public List<String> getReclamacoes() {
+        return reclamacoes;
+    }
+
+    public void setReclamacoes(List<String> reclamacoes) {
+        this.reclamacoes = reclamacoes;
+    }
+
+    // ───── Métodos ─────
+
     public int calcularScore() {
         int score = 50;
 
@@ -80,7 +118,6 @@ public class Analise implements IAnalisavel {
         return score;
     }
 
-    @Override
     public String gerarRelatorio() {
         StringBuilder sb = new StringBuilder();
 
@@ -88,7 +125,6 @@ public class Analise implements IAnalisavel {
         sb.append("\n        RELATORIO DE REUNIAO TOTVS      ");
         sb.append("\n========================================");
 
-        // Dados da reunião
         if (reuniao != null) {
             sb.append("\n\n--- DADOS DA REUNIAO ---");
             sb.append("\nData: ").append(reuniao.getData());
@@ -100,7 +136,6 @@ public class Analise implements IAnalisavel {
             sb.append("\nNPS: ").append(reuniao.getNotaNps());
         }
 
-        // Dados do cliente
         if (cliente != null) {
             sb.append("\n\n--- DADOS DO CLIENTE ---");
             sb.append("\nNome: ").append(cliente.getNome());
@@ -108,13 +143,11 @@ public class Analise implements IAnalisavel {
             sb.append("\nEmpresa: ").append(cliente.getEmpresa());
         }
 
-        // Análise
         sb.append("\n\n--- ANALISE ---");
         sb.append("\nSentimento: ").append(sentimento);
         sb.append("\nTom de Voz: ").append(tomDeVoz);
         sb.append("\nScore Geral: ").append(scoreGeral).append("/100");
 
-        // Produtos
         sb.append("\n\n--- PRODUTOS IDENTIFICADOS ---");
         if (produtos.isEmpty()) {
             sb.append("\nNenhum produto identificado.");
@@ -126,7 +159,6 @@ public class Analise implements IAnalisavel {
             }
         }
 
-        // Alertas
         sb.append("\n\n--- ALERTAS ---");
         if (alertas.isEmpty()) {
             sb.append("\nNenhum alerta identificado.");
@@ -137,7 +169,6 @@ public class Analise implements IAnalisavel {
             }
         }
 
-        // Reclamações
         sb.append("\n\n--- RECLAMACOES ---");
         if (reclamacoes.isEmpty()) {
             sb.append("\nNenhuma reclamacao identificada.");
@@ -148,42 +179,21 @@ public class Analise implements IAnalisavel {
         }
 
         sb.append("\n========================================");
-
         return sb.toString();
     }
-
-    // ───── Demais métodos ─────
 
     public List<String> detectarReclamacoes() {
         String texto = reuniao.getTextoOriginal().toLowerCase();
 
-        List<String> reclamacoesSuporte = List.of(
-                "suporte", "atendimento", "demora", "nao respondeu", "sem retorno"
-        );
-        List<String> reclamacoesProduto = List.of(
-                "trava", "lento", "erro", "bug", "falha", "nao funciona",
-                "travando", "caindo", "instavel"
-        );
-        List<String> reclamacoesPreco = List.of(
-                "caro", "valor alto", "preco", "custo elevado", "muito caro"
-        );
-        List<String> reclamacoesIntegracao = List.of(
-                "nao integra", "nao comunica", "sistema separado",
-                "nao conversa", "isolado"
-        );
+        List<String> reclamacoesSuporte = List.of("suporte", "atendimento", "demora", "nao respondeu", "sem retorno");
+        List<String> reclamacoesProduto = List.of("trava", "lento", "erro", "bug", "falha", "nao funciona", "travando", "caindo", "instavel");
+        List<String> reclamacoesPreco = List.of("caro", "valor alto", "preco", "custo elevado", "muito caro");
+        List<String> reclamacoesIntegracao = List.of("nao integra", "nao comunica", "sistema separado", "nao conversa", "isolado");
 
-        for (String sinal : reclamacoesSuporte) {
-            if (texto.contains(sinal)) reclamacoes.add("SUPORTE: " + sinal);
-        }
-        for (String sinal : reclamacoesProduto) {
-            if (texto.contains(sinal)) reclamacoes.add("PRODUTO: " + sinal);
-        }
-        for (String sinal : reclamacoesPreco) {
-            if (texto.contains(sinal)) reclamacoes.add("PRECO: " + sinal);
-        }
-        for (String sinal : reclamacoesIntegracao) {
-            if (texto.contains(sinal)) reclamacoes.add("INTEGRACAO: " + sinal);
-        }
+        for (String sinal : reclamacoesSuporte)   { if (texto.contains(sinal)) reclamacoes.add("SUPORTE: " + sinal); }
+        for (String sinal : reclamacoesProduto)   { if (texto.contains(sinal)) reclamacoes.add("PRODUTO: " + sinal); }
+        for (String sinal : reclamacoesPreco)     { if (texto.contains(sinal)) reclamacoes.add("PRECO: " + sinal); }
+        for (String sinal : reclamacoesIntegracao){ if (texto.contains(sinal)) reclamacoes.add("INTEGRACAO: " + sinal); }
 
         return reclamacoes;
     }
@@ -191,22 +201,11 @@ public class Analise implements IAnalisavel {
     public String detectarTomDeVoz() {
         String texto = reuniao.getTextoOriginal().toLowerCase();
 
-        List<String> tomAgressivo = List.of(
-                "absurdo", "inaceitavel", "ridiculo", "nao aguento", "revoltado",
-                "uma vergonha", "inadmissivel", "pessimo", "horrivel"
-        );
-        List<String> tomPositivo = List.of(
-                "otimo", "excelente", "maravilhoso", "perfeito", "feliz",
-                "satisfeito", "contente", "muito bom", "aprovado"
-        );
-        List<String> tomAnsioso = List.of(
-                "urgente", "preciso logo", "quanto antes", "prazo",
-                "atrasado", "nao pode esperar", "emergencia"
-        );
+        List<String> tomAgressivo = List.of("absurdo", "inaceitavel", "ridiculo", "nao aguento", "revoltado", "uma vergonha", "inadmissivel", "pessimo", "horrivel");
+        List<String> tomPositivo  = List.of("otimo", "excelente", "maravilhoso", "perfeito", "feliz", "satisfeito", "contente", "muito bom", "aprovado");
+        List<String> tomAnsioso   = List.of("urgente", "preciso logo", "quanto antes", "prazo", "atrasado", "nao pode esperar", "emergencia");
 
-        int pontosAgressivo = 0;
-        int pontosPositivo = 0;
-        int pontosAnsioso = 0;
+        int pontosAgressivo = 0, pontosPositivo = 0, pontosAnsioso = 0;
 
         for (String sinal : tomAgressivo) { if (texto.contains(sinal)) pontosAgressivo++; }
         for (String sinal : tomPositivo)  { if (texto.contains(sinal)) pontosPositivo++; }
