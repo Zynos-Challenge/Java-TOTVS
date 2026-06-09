@@ -4,7 +4,6 @@ import br.com.totvs.conversacional.entities.Analise;
 import br.com.totvs.conversacional.entities.Analisador;
 import br.com.totvs.conversacional.entities.LeitorArquivo;
 import br.com.totvs.conversacional.entities.Reuniao;
-import br.com.totvs.conversacional.entities.Vendedor;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
