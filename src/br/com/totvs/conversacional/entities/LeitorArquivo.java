@@ -10,14 +10,13 @@ import java.util.List;
 
 public class LeitorArquivo {
 
-    private static final String CAMINHO_PADRAO = "src/resources/ANON_transcricao.json";
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private String caminhoArquivo;
     private List<Reuniao> reunioes;
 
     public LeitorArquivo() {
-        this.caminhoArquivo = CAMINHO_PADRAO;
+        this.caminhoArquivo = "";
         this.reunioes = new ArrayList<>();
     }
 
@@ -45,17 +44,22 @@ public class LeitorArquivo {
     public List<Reuniao> lerArquivoAutomatico() {
         this.reunioes.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivo))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                linha = linha.trim();
-                if (linha.isEmpty()) continue;
-                Reuniao reuniao = parsearLinha(linha);
-                if (reuniao != null) reunioes.add(reuniao);
+        try (var stream = getClass().getClassLoader().getResourceAsStream("ANON_transcricao.json")) {
+            if (stream == null) {
+                System.err.println("Arquivo não encontrado em resources/");
+                return reunioes;
+            }
+            try (BufferedReader br = new BufferedReader(new java.io.InputStreamReader(stream))) {
+                String linha;
+                while ((linha = br.readLine()) != null) {
+                    linha = linha.trim();
+                    if (linha.isEmpty()) continue;
+                    Reuniao reuniao = parsearLinha(linha);
+                    if (reuniao != null) reunioes.add(reuniao);
+                }
             }
         } catch (IOException e) {
-            System.err.println("Arquivo de transcrição não encontrado em: " + caminhoArquivo);
-            System.err.println("Coloque o arquivo ANON_transcricao.json em src/resources/");
+            System.err.println("Erro ao ler arquivo: " + e.getMessage());
         }
 
         return reunioes;
