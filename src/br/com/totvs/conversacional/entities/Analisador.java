@@ -38,7 +38,7 @@ public class Analisador {
 
     private void aplicarBonusNps(Analise analise) {
         Integer nps = analise.getReuniao().getNotaNps();
-        if (nps == null) return;   // registro sem NPS: não aplica bônus/penalidade
+        if (nps == null) return;
 
         int score = analise.getScoreGeral();
         if (nps >= 9) score += 10;
@@ -71,7 +71,6 @@ public class Analisador {
                 "\nTom Positivo: " + positivos +
                 "\nTom Agressivo: " + agressivos +
                 "\nTom Ansioso: " + ansiosos +
-                "\nTom Neutro: " + (total - positivos - agressivos - ansiosos) +
                 "\nScore critico (abaixo de 40): " + criticos;
     }
 }

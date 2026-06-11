@@ -19,7 +19,7 @@ public class TesteSistema {
 
     public static void main(String[] args) {
 
-        // ───── Carregamento automático ─────
+
         leitor = new LeitorArquivo();
         analisador = new Analisador();
         reunioes = leitor.lerArquivoAutomatico();
@@ -37,7 +37,7 @@ public class TesteSistema {
 
         exibirDialogo("Arquivo carregado com sucesso!\n" + leitor.toString(), "Sistema TOTVS");
 
-        // ───── Menu principal ─────
+
         boolean rodando = true;
         while (rodando) {
             String[] opcoes = {
@@ -72,7 +72,7 @@ public class TesteSistema {
         exibirDialogo("Sistema encerrado. Até logo!", "Sistema TOTVS");
     }
 
-    // ───── Opção 1: Analisar todas ─────
+
 
     private static void opcaoAnalisarTodas() {
         analises = analisador.analisarReunioes(reunioes);
@@ -80,7 +80,7 @@ public class TesteSistema {
                 "Use a opção 3 para ver o resumo geral.", "Análise Concluída");
     }
 
-    // ───── Opção 2: Detalhes completos por ID ─────
+
     private static void opcaoDetalhesPorId() {
         String entrada = JOptionPane.showInputDialog(
                 null,
@@ -130,7 +130,7 @@ public class TesteSistema {
         }
     }
 
-    // ───── Opção 3: Resumo geral ─────
+
 
     private static void opcaoResumoGeral() {
         if (analises == null || analises.isEmpty()) {
@@ -142,7 +142,7 @@ public class TesteSistema {
         exibirRelatorio("Resumo Geral", analisador.toString());
     }
 
-    // ───── Opção 4: Buscar por segmento ─────
+
 
     private static void opcaoBuscarSegmento() {
         String segmento = JOptionPane.showInputDialog(
@@ -181,14 +181,14 @@ public class TesteSistema {
         }
     }
 
-    // ───── Utilitários de exibição ─────
 
-    // Diálogo simples para mensagens curtas
+
+
     private static void exibirDialogo(String mensagem, String titulo) {
         JOptionPane.showMessageDialog(null, mensagem, titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // Diálogo com scroll para relatórios longos
+
     private static void exibirRelatorio(String titulo, String conteudo) {
         JTextArea textArea = new JTextArea(conteudo);
         textArea.setEditable(false);

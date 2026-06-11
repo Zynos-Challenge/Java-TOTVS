@@ -104,7 +104,7 @@ public class Analise {
         this.vendedor = vendedor;
     }
 
-    // ───── Métodos ─────
+
 
     public int calcularScore() {
         int score = 50;
@@ -147,7 +147,7 @@ public class Analise {
             }
         }
 
-        // Menção de concorrente
+
         List<String> sinaisConcorrente = List.of(
                 "concorrente", "outro sistema", "outra solução", "sap", "oracle",
                 "senior", "datasul", "linx", "protheus", "rm ", "fluig"
@@ -188,7 +188,7 @@ public class Analise {
         StringBuilder sb = new StringBuilder();
 
         sb.append("\n╔══════════════════════════════════════════╗");
-        sb.append("\n║     RELATÓRIO DETALHADO - TOTVS          ║");
+        sb.append("\n║     RELATÓRIO DETALHADO - VAOX           ║");
         sb.append("\n╚══════════════════════════════════════════╝");
 
         // ── Dados da Reunião ──
@@ -249,7 +249,7 @@ public class Analise {
         }
         sb.append("\n└──────────────────────────────────────────");
 
-        sb.append("\n\n╔══════════════════════════════════════════╗");
+        sb.append("\n╔══════════════════════════════════════════╗");
         sb.append("\n║            FIM DO RELATÓRIO              ║");
         sb.append("\n╚══════════════════════════════════════════╝");
 
@@ -289,20 +289,16 @@ public class Analise {
             this.tomDeVoz = "AGRESSIVO";
         } else if (pontosAnsioso >= pontosPositivo && pontosAnsioso >= pontosAgressivo) {
             this.tomDeVoz = "ANSIOSO";
-        } else if (pontosPositivo > 0) {
-            this.tomDeVoz = "POSITIVO";
         } else {
-            this.tomDeVoz = "NEUTRO";
+            this.tomDeVoz = "POSITIVO";
         }
 
         if (this.tomDeVoz.equals("POSITIVO")) {
             this.sentimento = "Satisfeito";
         } else if (this.tomDeVoz.equals("AGRESSIVO")) {
             this.sentimento = "Insatisfeito";
-        } else if (this.tomDeVoz.equals("ANSIOSO")) {
-            this.sentimento = "Ansioso";
         } else {
-            this.sentimento = "Neutro";
+            this.sentimento = "Ansioso";
         }
 
 

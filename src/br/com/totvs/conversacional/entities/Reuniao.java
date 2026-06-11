@@ -25,7 +25,7 @@ public class Reuniao {
 
     public Reuniao() {}
 
-    // ── Getters e Setters ──
+
 
 
     public Integer getNotaNps() {

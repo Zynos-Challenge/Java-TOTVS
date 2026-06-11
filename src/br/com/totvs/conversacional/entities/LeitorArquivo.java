@@ -44,7 +44,7 @@ public class LeitorArquivo {
     public List<Reuniao> lerArquivoAutomatico() {
         this.reunioes.clear();
 
-        // Tenta encontrar o arquivo em diferentes caminhos
+
         String[] caminhos = {
                 "src/resources/ANON_transcricao.json",
                 "resources/ANON_transcricao.json",
@@ -63,7 +63,7 @@ public class LeitorArquivo {
         }
 
         if (arquivo == null) {
-            // Último recurso: tenta pelo diretório do .class
+
             try {
                 java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
                 java.io.File base = new java.io.File(url.toURI()).getParentFile();
