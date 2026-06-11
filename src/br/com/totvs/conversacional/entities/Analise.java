@@ -143,7 +143,7 @@ public class Analise {
                         "ALTA",
                         sinal
                 ));
-                break; // um alerta de churn é suficiente
+                break;
             }
         }
 
@@ -164,7 +164,7 @@ public class Analise {
             }
         }
 
-        // Oportunidade de expansão
+
         List<String> sinaisOportunidade = List.of(
                 "expandir", "ampliar", "novo módulo", "novo modulo", "contratar mais",
                 "outros setores", "outras filiais", "crescimento", "implantar mais"
@@ -191,7 +191,7 @@ public class Analise {
         sb.append("\n║     RELATÓRIO DETALHADO - VAOX           ║");
         sb.append("\n╚══════════════════════════════════════════╝");
 
-        // ── Dados da Reunião ──
+
         if (reuniao != null) {
             sb.append("\n\n┌─ DADOS DA REUNIÃO ───────────────────────");
             sb.append("\n  ID           : ").append(reuniao.getId());
@@ -211,7 +211,7 @@ public class Analise {
             sb.append("\n└──────────────────────────────────────────");
         }
 
-        // ── Análise de Sentimento e Score ──
+
         sb.append("\n\n┌─ ANÁLISE ────────────────────────────────");
         sb.append("\n  Sentimento   : ").append(sentimento != null ? sentimento : "Não detectado");
         sb.append("\n  Tom de Voz   : ").append(tomDeVoz   != null ? tomDeVoz   : "Não detectado");
@@ -223,7 +223,7 @@ public class Analise {
         sb.append("] ").append(scoreGeral).append("%");
         sb.append("\n└──────────────────────────────────────────");
 
-        // ── Alertas ──
+
         sb.append("\n\n┌─ ALERTAS ────────────────────────────────");
         if (alertas == null || alertas.isEmpty()) {
             sb.append("\n  Nenhum alerta identificado.");
@@ -238,7 +238,7 @@ public class Analise {
         }
         sb.append("\n└──────────────────────────────────────────");
 
-        // ── Reclamações ──
+
         sb.append("\n\n┌─ RECLAMAÇÕES DETECTADAS ─────────────────");
         if (reclamacoes == null || reclamacoes.isEmpty()) {
             sb.append("\n  Nenhuma reclamação identificada.");

@@ -26,8 +26,6 @@ public class Reuniao {
     public Reuniao() {}
 
 
-
-
     public Integer getNotaNps() {
         return notaNps;
     }
