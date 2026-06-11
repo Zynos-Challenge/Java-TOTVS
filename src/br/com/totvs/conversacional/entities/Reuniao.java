@@ -14,14 +14,14 @@ public class Reuniao {
     private String codt;
     private boolean externo;
 
-    // Campos opcionais (nem sempre presentes no JSON)
+
     private String segmento;
     private String unidade;
     private String cnae;
     private String uf;
     private String faixaFaturamento;
     private String tipoRecurso;
-    private Integer notaNps;           // Integer (nullable) — só 26% dos registros têm
+    private Integer notaNps;
 
     public Reuniao() {}
 
