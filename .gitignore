@@ -34,4 +34,4 @@ bin/
 .env
 
 # Arquivo de transcrição protegido - não sobe pro GitHub
-src/resources/
+src/resources/teste.java
