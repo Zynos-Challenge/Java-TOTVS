@@ -34,6 +34,6 @@ bin/
 .env
 
 # Credenciais do banco — nunca subir para o GitHub
-src/br.com.totvs.conversacional/resources/db.properties
+src/resources/db.properties
 
 

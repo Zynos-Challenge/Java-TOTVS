@@ -28,7 +28,7 @@ public class TesteSistema {
         if (reunioes.isEmpty()) {
             JOptionPane.showMessageDialog(null,
                     "Arquivo de transcrição não encontrado.\n" +
-                            "Coloque o arquivo ANON_transcricao.json em src/resources/\n" +
+                            "Coloque o arquivo ANON_transcricao.json em src/br.com.totvs.conversacional/resources/\n" +
                             "(essa pasta está no .gitignore para proteger os dados).",
                     "Sistema TOTVS - Erro",
                     JOptionPane.ERROR_MESSAGE

@@ -49,7 +49,8 @@ public class LeitorArquivo {
                 "src/resources/ANON_transcricao.json",
                 "resources/ANON_transcricao.json",
                 "ANON_transcricao.json",
-                "../src/resources/ANON_transcricao.json"
+                "../src/resources/ANON_transcricao.json",
+                "src/br.com.totvs.conversacional/resources/"
         };
 
         java.io.File arquivo = null;
