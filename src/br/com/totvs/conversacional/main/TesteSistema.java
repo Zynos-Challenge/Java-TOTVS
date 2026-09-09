@@ -4,6 +4,7 @@ import br.com.totvs.conversacional.entities.Analise;
 import br.com.totvs.conversacional.entities.Analisador;
 import br.com.totvs.conversacional.entities.LeitorArquivo;
 import br.com.totvs.conversacional.entities.Reuniao;
+import br.com.totvs.conversacional.dao.ReuniaoDAO;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -45,7 +46,8 @@ public class TesteSistema {
                     "2 - Ver detalhes de uma reunião por ID",
                     "3 - Exibir resumo geral",
                     "4 - Buscar por segmento",
-                    "5 - Sair"
+                    "5 - Testar conexao com banco",
+                    "6 - Sair"
             };
 
             String escolha = (String) JOptionPane.showInputDialog(
@@ -65,7 +67,8 @@ public class TesteSistema {
                 case '2' -> opcaoDetalhesPorId();
                 case '3' -> opcaoResumoGeral();
                 case '4' -> opcaoBuscarSegmento();
-                case '5' -> rodando = false;
+                case '5' -> opcaoTestarBanco();
+                case '6' -> rodando = false;
             }
         }
 
@@ -199,5 +202,33 @@ public class TesteSistema {
         scrollPane.setPreferredSize(new java.awt.Dimension(620, 480));
 
         JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private static void opcaoTestarBanco() {
+        ReuniaoDAO dao = new ReuniaoDAO();
+
+        int total = dao.contarTotal();
+
+        if (total > 0) {
+            exibirDialogo(
+                    "Conexão com banco OK!\n" +
+                            "Total de reuniões no banco: " + total,
+                    "Teste de Banco"
+            );
+        } else {
+            Reuniao primeira = reunioes.isEmpty() ? null : reunioes.get(0);
+
+            if (primeira != null) {
+                boolean inseriu = dao.inserir(primeira);
+                exibirDialogo(
+                        inseriu
+                                ? "Conexão OK! Primeira reunião inserida com sucesso.\nID: " + primeira.getId()
+                                : "Conexão falhou. Verifique usuário, senha e se o Oracle está rodando.",
+                        "Teste de Banco"
+                );
+            } else {
+                exibirDialogo("Nenhuma reunião carregada para testar.", "Teste de Banco");
+            }
+        }
     }
 }
