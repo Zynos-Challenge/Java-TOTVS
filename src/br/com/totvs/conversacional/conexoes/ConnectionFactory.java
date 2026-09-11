@@ -14,7 +14,7 @@ public class ConnectionFactory {
     static {
         try (InputStream input = ConnectionFactory.class
                 .getClassLoader()
-                .getResourceAsStream("db.properties")) {
+                .getResourceAsStream("br/com/totvs/conversacional/resources/db.properties")) {
 
             if (input == null) {
                 throw new RuntimeException(

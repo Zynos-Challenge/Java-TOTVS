@@ -34,5 +34,6 @@ bin/
 .env
 
 
-**/resources/db.properties/
+**/resources/db.properties
+**/resources/ANON_transcricao.json
 

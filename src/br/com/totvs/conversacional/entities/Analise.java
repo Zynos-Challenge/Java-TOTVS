@@ -200,7 +200,7 @@ public class Analise {
             sb.append("\n  Formato      : ").append(reuniao.getFormato() != null ? reuniao.getFormato() : "Não informado");
             sb.append("\n  Externo      : ").append(reuniao.isExterno() ? "Sim" : "Não");
 
-            // Campos opcionais — só exibe se existirem
+
             if (reuniao.getUf()              != null) sb.append("\n  UF           : ").append(reuniao.getUf());
             if (reuniao.getSegmento()        != null) sb.append("\n  Segmento     : ").append(reuniao.getSegmento());
             if (reuniao.getUnidade()         != null) sb.append("\n  Unidade      : ").append(reuniao.getUnidade());

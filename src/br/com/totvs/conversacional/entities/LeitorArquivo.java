@@ -1,6 +1,9 @@
 package br.com.totvs.conversacional.entities;
 
+import br.com.totvs.conversacional.dao.ReuniaoDAO;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,55 +44,27 @@ public class LeitorArquivo {
         this.reunioes = reunioes;
     }
 
-    public List<Reuniao> lerArquivoAutomatico() {
+
+    private boolean isArquivoJsonValido(File arquivo) {
+        if (arquivo == null || !arquivo.exists()) {
+            System.err.println("[LeitorArquivo] Arquivo inválido ou não encontrado.");
+            return false;
+        }
+        if (!arquivo.getName().toLowerCase().endsWith(".json")) {
+            System.err.println("[LeitorArquivo] Formato não suportado. Apenas arquivos .json são permitidos.");
+            return false;
+        }
+        return true;
+    }
+
+    public List<Reuniao> lerArquivo(File arquivo) {
         this.reunioes.clear();
 
-
-        String[] caminhos = {
-                "src/resources/ANON_transcricao.json",
-                "resources/ANON_transcricao.json",
-                "ANON_transcricao.json",
-                "../src/resources/ANON_transcricao.json",
-                "src/br.com.totvs.conversacional/resources/"
-        };
-
-        java.io.File arquivo = null;
-        for (String caminho : caminhos) {
-            java.io.File f = new java.io.File(caminho);
-            if (f.exists()) {
-                arquivo = f;
-                this.caminhoArquivo = f.getAbsolutePath();
-                break;
-            }
-        }
-
-        if (arquivo == null) {
-
-            try {
-                java.net.URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
-                java.io.File base = new java.io.File(url.toURI()).getParentFile();
-                while (base != null) {
-                    java.io.File tentativa = new java.io.File(base, "src/resources/ANON_transcricao.json");
-                    if (tentativa.exists()) {
-                        arquivo = tentativa;
-                        this.caminhoArquivo = tentativa.getAbsolutePath();
-                        break;
-                    }
-                    tentativa = new java.io.File(base, "resources/ANON_transcricao.json");
-                    if (tentativa.exists()) {
-                        arquivo = tentativa;
-                        this.caminhoArquivo = tentativa.getAbsolutePath();
-                        break;
-                    }
-                    base = base.getParentFile();
-                }
-            } catch (Exception ignored) {}
-        }
-
-        if (arquivo == null) {
-            System.err.println("Arquivo não encontrado.");
+        if (!isArquivoJsonValido(arquivo)) {
             return reunioes;
         }
+
+        this.caminhoArquivo = arquivo.getAbsolutePath();
 
         try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
             String linha;
@@ -106,10 +81,37 @@ public class LeitorArquivo {
         return reunioes;
     }
 
-    private Reuniao parsearLinha(String json) {
+    public int lerEInserirDireto(File arquivo, ReuniaoDAO dao) {
+        int totalProcessado = 0;
+
+        if (!isArquivoJsonValido(arquivo)) {
+            return 0;
+        }
+
+        this.caminhoArquivo = arquivo.getAbsolutePath();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                linha = linha.trim();
+                if (linha.isEmpty()) continue;
+
+                Reuniao reuniao = parsearLinha(linha);
+                if (reuniao != null) {
+                    dao.inserir(reuniao);
+                    totalProcessado++;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao ler e inserir arquivo: " + e.getMessage());
+        }
+
+        return totalProcessado;
+    }
+
+    public Reuniao parsearLinha(String json) {
         try {
             Reuniao r = new Reuniao();
-
 
             r.setId(extrairString(json, "ID_MEETING"));
             r.setTextoOriginal(extrairString(json, "ANON_TRANSCRICAO"));
@@ -135,14 +137,12 @@ public class LeitorArquivo {
                 r.setDuracao((h * 60) + m + (s >= 30 ? 1 : 0));
             }
 
-
             r.setSegmento(extrairOpcional(json, "NOME_SEGMENTO"));
             r.setUnidade(extrairOpcional(json, "NOME_UNIDADE"));
             r.setCnae(extrairOpcional(json, "CNAE"));
             r.setUf(extrairOpcional(json, "UF"));
             r.setFaixaFaturamento(extrairOpcional(json, "FAIXA_FATURAMENTO_CLIENTE_EC"));
             r.setTipoRecurso(extrairOpcional(json, "TP_RECURSO"));
-
 
             String npsStr = extrairOpcional(json, "NOTA_NPS");
             if (npsStr != null && !npsStr.isEmpty()) {
@@ -157,17 +157,14 @@ public class LeitorArquivo {
         }
     }
 
-
     private String extrairString(String json, String chave) {
         String v = extrairRaw(json, chave);
         return v != null ? v : "";
     }
 
-
     private String extrairOpcional(String json, String chave) {
         return extrairRaw(json, chave);
     }
-
 
     private boolean extrairBoolean(String json, String chave) {
         String busca = "\"" + chave + "\"";
@@ -178,11 +175,10 @@ public class LeitorArquivo {
         return json.startsWith("true", inicio);
     }
 
-
     private String extrairRaw(String json, String chave) {
         String busca = "\"" + chave + "\"";
         int idx = json.indexOf(busca);
-        if (idx == -1) return null;   // chave ausente = campo não existe neste registro
+        if (idx == -1) return null;
 
         int inicio = json.indexOf(":", idx) + 1;
         while (inicio < json.length() && json.charAt(inicio) == ' ') inicio++;
@@ -210,7 +206,6 @@ public class LeitorArquivo {
             return sb.toString();
         }
 
-
         int fim = inicio;
         while (fim < json.length() && json.charAt(fim) != ',' && json.charAt(fim) != '}') fim++;
         return json.substring(inicio, fim).trim();
@@ -220,6 +215,6 @@ public class LeitorArquivo {
     public String toString() {
         return "\n=== LEITOR ARQUIVO ===" +
                 "\nCaminho: " + caminhoArquivo +
-                "\nReunioes carregadas: " + reunioes.size();
+                "\nReunioes carregadas: " + (reunioes != null ? reunioes.size() : 0);
     }
 }

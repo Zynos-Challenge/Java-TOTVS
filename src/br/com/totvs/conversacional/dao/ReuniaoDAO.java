@@ -11,10 +11,10 @@ import java.util.Optional;
 public class ReuniaoDAO {
 
     private static final String SQL_INSERT =
-            "INSERT INTO reuniao (id_reuniao, data, data_criacao, duracao, " +
+            "INSERT INTO reuniao (id_reuniao, data, data_criacao, duracao, texto_original, " +
                     "formato, status, codt, externo, segmento, unidade, cnae, uf, " +
                     "faixa_faturamento, tipo_recurso, nota_nps) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_SELECT_BY_ID =
             "SELECT * FROM reuniao WHERE id_reuniao = ?";
@@ -26,7 +26,7 @@ public class ReuniaoDAO {
             "SELECT * FROM reuniao WHERE UPPER(segmento) = UPPER(?) ORDER BY data DESC";
 
     private static final String SQL_UPDATE =
-            "UPDATE reuniao SET data = ?, duracao = ?, formato = ?, status = ?, " +
+            "UPDATE reuniao SET data = ?, duracao = ?, texto_original = ?, formato = ?, status = ?, " +
                     "segmento = ?, unidade = ?, uf = ?, nota_nps = ? WHERE id_reuniao = ?";
 
     private static final String SQL_DELETE =
@@ -69,14 +69,13 @@ public class ReuniaoDAO {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_INSERT)) {
 
-            conn.setAutoCommit(false); // inicia transacao
+            conn.setAutoCommit(false);
 
             for (Reuniao r : reunioes) {
                 if (r == null || r.getId() == null) continue;
                 mapearParaStatement(ps, r);
                 ps.addBatch();
                 inseridos++;
-
 
                 if (inseridos % 100 == 0) {
                     ps.executeBatch();
@@ -95,7 +94,6 @@ public class ReuniaoDAO {
 
         return inseridos;
     }
-
 
     public Optional<Reuniao> buscarPorId(String idReuniao) {
         if (idReuniao == null || idReuniao.isBlank()) return Optional.empty();
@@ -116,7 +114,6 @@ public class ReuniaoDAO {
         return Optional.empty();
     }
 
-
     public List<Reuniao> listarTodas() {
         List<Reuniao> lista = new ArrayList<>();
 
@@ -132,7 +129,6 @@ public class ReuniaoDAO {
 
         return lista;
     }
-
 
     public List<Reuniao> listarPorSegmento(String segmento) {
         if (segmento == null || segmento.isBlank()) return new ArrayList<>();
@@ -155,7 +151,6 @@ public class ReuniaoDAO {
         return lista;
     }
 
-
     public List<Reuniao> listarAltoRiscoChurn(double limiteChurn) {
         List<Reuniao> lista = new ArrayList<>();
 
@@ -175,7 +170,6 @@ public class ReuniaoDAO {
         return lista;
     }
 
-
     public int contarTotal() {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_COUNT);
@@ -190,30 +184,28 @@ public class ReuniaoDAO {
         return 0;
     }
 
-
     public boolean atualizar(Reuniao reuniao) {
         if (reuniao == null || reuniao.getId() == null) return false;
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
 
-            ps.setTimestamp(1, reuniao.getData() != null ?
-                    Timestamp.valueOf(reuniao.getData()) : null);
+            ps.setTimestamp(1, reuniao.getData() != null ? Timestamp.valueOf(reuniao.getData()) : null);
             ps.setInt(2, reuniao.getDuracao());
-            ps.setString(3, reuniao.getFormato());
-            ps.setString(4, reuniao.getStatus());
-            ps.setString(5, reuniao.getSegmento());
-            ps.setString(6, reuniao.getUnidade());
-            ps.setString(7, reuniao.getUf());
+            ps.setString(3, reuniao.getTextoOriginal());
+            ps.setString(4, reuniao.getFormato());
+            ps.setString(5, reuniao.getStatus());
+            ps.setString(6, reuniao.getSegmento());
+            ps.setString(7, reuniao.getUnidade());
+            ps.setString(8, reuniao.getUf());
             if (reuniao.getNotaNps() != null)
-                ps.setInt(8, reuniao.getNotaNps());
+                ps.setInt(9, reuniao.getNotaNps());
             else
-                ps.setNull(8, Types.NUMERIC);
-            ps.setString(9, reuniao.getId());
+                ps.setNull(9, Types.NUMERIC);
+            ps.setString(10, reuniao.getId());
 
             boolean sucesso = ps.executeUpdate() > 0;
-            System.out.println("[ReuniaoDAO] Reuniao " +
-                    (sucesso ? "atualizada" : "nao encontrada") + ": " + reuniao.getId());
+            System.out.println("[ReuniaoDAO] Reuniao " + (sucesso ? "atualizada" : "nao encontrada") + ": " + reuniao.getId());
             return sucesso;
 
         } catch (SQLException e) {
@@ -221,7 +213,6 @@ public class ReuniaoDAO {
             return false;
         }
     }
-
 
     public boolean deletar(String idReuniao) {
         if (idReuniao == null || idReuniao.isBlank()) return false;
@@ -231,8 +222,7 @@ public class ReuniaoDAO {
 
             ps.setString(1, idReuniao);
             boolean sucesso = ps.executeUpdate() > 0;
-            System.out.println("[ReuniaoDAO] Reuniao " +
-                    (sucesso ? "deletada" : "nao encontrada") + ": " + idReuniao);
+            System.out.println("[ReuniaoDAO] Reuniao " + (sucesso ? "deletada" : "nao encontrada") + ": " + idReuniao);
             return sucesso;
 
         } catch (SQLException e) {
@@ -241,36 +231,34 @@ public class ReuniaoDAO {
         }
     }
 
-
     private void mapearParaStatement(PreparedStatement ps, Reuniao r) throws SQLException {
         ps.setString(1, r.getId());
-        ps.setTimestamp(2, r.getData() != null ?
-                Timestamp.valueOf(r.getData()) : null);
-        ps.setTimestamp(3, r.getDataCriacao() != null ?
-                Timestamp.valueOf(r.getDataCriacao()) : null);
+        ps.setTimestamp(2, r.getData() != null ? Timestamp.valueOf(r.getData()) : null);
+        ps.setTimestamp(3, r.getDataCriacao() != null ? Timestamp.valueOf(r.getDataCriacao()) : null);
         ps.setInt(4, r.getDuracao());
-        ps.setString(5, r.getFormato());
-        ps.setString(6, r.getStatus());
-        ps.setString(7, r.getCodt());
-        ps.setString(8, r.isExterno() ? "S" : "N");
-        ps.setString(9, r.getSegmento());
-        ps.setString(10, r.getUnidade());
-        ps.setString(11, r.getCnae());
-        ps.setString(12, r.getUf());
-        ps.setString(13, r.getFaixaFaturamento());
-        ps.setString(14, r.getTipoRecurso());
+        ps.setString(5, r.getTextoOriginal());
+        ps.setString(6, r.getFormato());
+        ps.setString(7, r.getStatus());
+        ps.setString(8, r.getCodt());
+        ps.setString(9, r.isExterno() ? "S" : "N");
+        ps.setString(10, r.getSegmento());
+        ps.setString(11, r.getUnidade());
+        ps.setString(12, r.getCnae());
+        ps.setString(13, r.getUf());
+        ps.setString(14, r.getFaixaFaturamento());
+        ps.setString(15, r.getTipoRecurso());
         if (r.getNotaNps() != null)
-            ps.setInt(15, r.getNotaNps());
+            ps.setInt(16, r.getNotaNps());
         else
-            ps.setNull(15, Types.NUMERIC);
+            ps.setNull(16, Types.NUMERIC);
     }
-
 
     private Reuniao mapearReuniao(ResultSet rs) throws SQLException {
         Reuniao r = new Reuniao();
 
         r.setId(rs.getString("id_reuniao"));
         r.setDuracao(rs.getInt("duracao"));
+        r.setTextoOriginal(rs.getString("texto_original"));
         r.setFormato(rs.getString("formato"));
         r.setStatus(rs.getString("status"));
         r.setCodt(rs.getString("codt"));
