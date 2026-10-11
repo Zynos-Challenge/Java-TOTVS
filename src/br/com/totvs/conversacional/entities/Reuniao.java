@@ -7,7 +7,7 @@ public class Reuniao {
     private String id;
     private LocalDateTime data;
     private LocalDateTime dataCriacao;
-    private int duracao;
+    private Integer duracao;
     private String textoOriginal;
     private String formato;
     private String status;
@@ -122,11 +122,11 @@ public class Reuniao {
         this.textoOriginal = textoOriginal;
     }
 
-    public int getDuracao() {
+    public Integer getDuracao() {
         return duracao;
     }
 
-    public void setDuracao(int duracao) {
+    public void setDuracao(Integer duracao) {
         this.duracao = duracao;
     }
 

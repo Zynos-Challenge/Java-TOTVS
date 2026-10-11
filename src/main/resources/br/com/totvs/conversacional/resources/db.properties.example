@@ -1,0 +1,3 @@
+db.url=jdbc:oracle:thin:@oracle.fiap.com.br:1521:orcl
+db.usuario=SEU_USUARIO
+db.senha=SUA_SENHA

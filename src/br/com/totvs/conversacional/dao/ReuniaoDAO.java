@@ -1,5 +1,6 @@
 package br.com.totvs.conversacional.dao;
 
+import org.springframework.stereotype.Repository;
 import br.com.totvs.conversacional.conexoes.ConnectionFactory;
 import br.com.totvs.conversacional.entities.Reuniao;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class ReuniaoDAO {
 
     private static final String SQL_INSERT =
@@ -130,22 +132,31 @@ public class ReuniaoDAO {
         return lista;
     }
 
+
     public List<Reuniao> listarPorSegmento(String segmento) {
-        if (segmento == null || segmento.isBlank()) return new ArrayList<>();
+        if (segmento == null || segmento.isBlank()) {
+            return new ArrayList<>();
+        }
 
         List<Reuniao> lista = new ArrayList<>();
+        String segmentoNormalizado = segmento.trim();
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_SELECT_BY_SEGMENTO)) {
 
-            ps.setString(1, segmento);
+            ps.setString(1, segmentoNormalizado);
 
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) lista.add(mapearReuniao(rs));
+                while (rs.next()) {
+                    lista.add(mapearReuniao(rs));
+                }
             }
 
         } catch (SQLException e) {
-            System.err.println("[ReuniaoDAO] Erro ao buscar por segmento: " + e.getMessage());
+            System.err.println(
+                    "[ReuniaoDAO] Erro ao buscar por segmento: "
+                            + e.getMessage()
+            );
         }
 
         return lista;
@@ -191,7 +202,11 @@ public class ReuniaoDAO {
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
 
             ps.setTimestamp(1, reuniao.getData() != null ? Timestamp.valueOf(reuniao.getData()) : null);
-            ps.setInt(2, reuniao.getDuracao());
+            if (reuniao.getDuracao() != null) {
+                ps.setInt(2, reuniao.getDuracao());
+            } else {
+                ps.setNull(2, Types.NUMERIC);
+            }
             ps.setString(3, reuniao.getTextoOriginal());
             ps.setString(4, reuniao.getFormato());
             ps.setString(5, reuniao.getStatus());
@@ -235,7 +250,11 @@ public class ReuniaoDAO {
         ps.setString(1, r.getId());
         ps.setTimestamp(2, r.getData() != null ? Timestamp.valueOf(r.getData()) : null);
         ps.setTimestamp(3, r.getDataCriacao() != null ? Timestamp.valueOf(r.getDataCriacao()) : null);
-        ps.setInt(4, r.getDuracao());
+        if (r.getDuracao() != null) {
+            ps.setInt(4, r.getDuracao());
+        } else {
+            ps.setNull(4, Types.NUMERIC);
+        }
         ps.setString(5, r.getTextoOriginal());
         ps.setString(6, r.getFormato());
         ps.setString(7, r.getStatus());
@@ -257,7 +276,10 @@ public class ReuniaoDAO {
         Reuniao r = new Reuniao();
 
         r.setId(rs.getString("id_reuniao"));
-        r.setDuracao(rs.getInt("duracao"));
+        int duracao = rs.getInt("duracao");
+        if (!rs.wasNull()) {
+            r.setDuracao(duracao);
+        }
         r.setTextoOriginal(rs.getString("texto_original"));
         r.setFormato(rs.getString("formato"));
         r.setStatus(rs.getString("status"));
