@@ -1,6 +1,7 @@
 
 package br.com.totvs.conversacional.controller;
 
+import br.com.totvs.conversacional.dto.ResultadoImportacao;
 import br.com.totvs.conversacional.entities.Reuniao;
 import br.com.totvs.conversacional.service.ReuniaoService;
 import org.springframework.http.HttpStatus;
@@ -42,13 +43,20 @@ public class ReuniaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reuniao);
     }
 
+    @PostMapping("/lote")
+    public ResponseEntity<ResultadoImportacao> importarLote(@RequestBody List<Reuniao> reunioes) {
+        return ResponseEntity.ok(reuniaoService.importarLote(reunioes));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Void> atualizar(
             @PathVariable String id,
             @RequestBody Reuniao reuniao) {
 
         if (reuniao == null || !id.equals(reuniao.getId())) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException(
+                    "O ID da URI deve ser igual ao ID do corpo."
+            );
         }
 
         boolean atualizada = reuniaoService.atualizar(reuniao);

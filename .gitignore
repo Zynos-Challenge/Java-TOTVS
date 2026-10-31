@@ -1,4 +1,3 @@
-```gitignore
 # IntelliJ IDEA
 .idea/
 *.iml
@@ -56,3 +55,6 @@ target/
 *.iml
 target/
 **/db.properties
+
+# Cache persistente das analises (dados potencialmente sensiveis)
+/dados/

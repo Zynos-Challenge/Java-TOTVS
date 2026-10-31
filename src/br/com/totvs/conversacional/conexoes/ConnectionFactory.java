@@ -18,8 +18,9 @@ public class ConnectionFactory {
 
             if (input == null) {
                 throw new RuntimeException(
-                        "Arquivo db.properties nao encontrado em src/main/resources/\n" +
-                                "Copie o db.properties.example, renomeie para db.properties " +
+                        "Arquivo db.properties nao encontrado em " +
+                                "src/main/resources/br/com/totvs/conversacional/resources/. " +
+                                "Copie o db.properties, renomeie para db.properties " +
                                 "e preencha com suas credenciais."
                 );
             }

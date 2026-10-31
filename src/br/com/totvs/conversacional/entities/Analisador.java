@@ -30,6 +30,7 @@ public class Analisador {
             analise.detectarTomDeVoz();
             analise.calcularScore();
             aplicarBonusNps(analise);
+            analise.calcularRisco();
             this.analises.add(analise);
         }
 

@@ -2,9 +2,10 @@ package br.com.totvs.conversacional.main;
 
 import br.com.totvs.conversacional.entities.Analise;
 import br.com.totvs.conversacional.entities.Analisador;
-import br.com.totvs.conversacional.entities.LeitorArquivo;
 import br.com.totvs.conversacional.entities.Reuniao;
 import br.com.totvs.conversacional.dao.ReuniaoDAO;
+import br.com.totvs.conversacional.exception.AcessoDadosException;
+import br.com.totvs.conversacional.service.LeitorArquivo;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -254,6 +255,7 @@ public class TesteSistema {
                 continue;
             }
 
+            try {
             switch (escolha.charAt(0)) {
                 case '1' -> {
                     String id = (String) JOptionPane.showInputDialog(
@@ -410,6 +412,9 @@ public class TesteSistema {
                         }
                     }
                 }
+            }
+            } catch (AcessoDadosException e) {
+                exibirDialogo("Erro de banco de dados: " + e.getMessage(), "Erro");
             }
         }
     }
